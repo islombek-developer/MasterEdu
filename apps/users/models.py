@@ -120,7 +120,7 @@ class Group(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.title} - {self.teacher.get_full_name()} - {self.branch.name}"
+        return f"{self.title} - {self.teacher.get_full_name()} "
 
 
 class Student(models.Model):
@@ -160,11 +160,54 @@ class DailyPayment(models.Model):
     group = models.ForeignKey(Group, on_delete=models.CASCADE, related_name='payments')
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='payments')
     payment_date = models.DateField(default=date.today)
-    remaining_amount = models.IntegerField()
+    remaining_amount = models.IntegerField(blank=True, null=True)
     paid_amount = models.IntegerField()
     note = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def save(self, *args, **kwargs):
+        """Saqlashdan oldin StudentPaymentHistory'ga yozib borish"""
+        super().save(*args, **kwargs)  
+
+        StudentPaymentHistory.objects.create(
+            student=self.student,
+            payment=self,
+            amount=self.paid_amount
+        )
+
     def __str__(self):
         return f"{self.student.first_name} - {self.payment_date} - {self.paid_amount}"
+    
+class StudentPaymentHistory(models.Model):
+    student = models.ForeignKey(Student,on_delete=models.CASCADE)
+    payment = models.ForeignKey(DailyPayment,on_delete=models.CASCADE)
+    amount = models.IntegerField()
+    date = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"{self.student} - {self.date.strftime('%Y-%m-%d %H:%M')} - {self.amount}"
+
+class Schedule(models.Model):
+    group = models.ForeignKey(Group, on_delete=models.CASCADE, related_name='schedules')
+    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE, related_name='schedules')
+    subject = models.CharField(max_length=255,blank=True, null=True)
+    day_of_week = models.CharField(max_length=10, choices=[
+        ('Monday', 'Monday'), ('Tuesday', 'Tuesday'), ('Wednesday', 'Wednesday'), 
+        ('Thursday', 'Thursday'), ('Friday', 'Friday'), ('Saturday', 'Saturday'), ('Sunday', 'Sunday')
+    ])
+    start_time = models.TimeField()
+    end_time = models.TimeField()
+
+    def __str__(self):
+        return f"{self.group.name} - {self.subject} ({self.day_of_week})"
+    
+class Notification(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
+    title = models.CharField(max_length=255)
+    message = models.TextField()
+    is_read = models.BooleanField(default=False,blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.full_name} - {self.title}"

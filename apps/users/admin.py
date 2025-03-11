@@ -1,5 +1,24 @@
 from django.contrib import admin
-from .models import Branch,User,Teacher,Student,DailyPayment,Attendance,Group
+from .models import Branch,User,Teacher,Student,DailyPayment,Attendance,Group,StudentPaymentHistory, Schedule, Notification
+
+
+@admin.register(StudentPaymentHistory)
+class StudentPaymentHistoryAdmin(admin.ModelAdmin):
+    list_display = ('student', 'payment', 'amount', 'date')
+    search_fields = ('student__user__username', 'student__user__full_name')
+    list_filter = ('date',)
+
+@admin.register(Schedule)
+class ScheduleAdmin(admin.ModelAdmin):
+    list_display = ('group', 'teacher', 'subject', 'day_of_week', 'start_time', 'end_time')
+    search_fields = ('group__name', 'teacher__user__full_name', 'subject')
+    list_filter = ('day_of_week', 'teacher')
+
+@admin.register(Notification)
+class NotificationAdmin(admin.ModelAdmin):
+    list_display = ('user', 'title', 'is_read', 'created_at')
+    search_fields = ('user__username', 'user__full_name', 'title')
+    list_filter = ('is_read', 'created_at')
 
 class TeacherAdmin(admin.ModelAdmin):
     def get_form(self, request, obj=None, **kwargs):
