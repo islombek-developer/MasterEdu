@@ -167,7 +167,6 @@ class DailyPayment(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def save(self, *args, **kwargs):
-        """Saqlashdan oldin StudentPaymentHistory'ga yozib borish"""
         super().save(*args, **kwargs)  
 
         StudentPaymentHistory.objects.create(
