@@ -39,6 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'drf_yasg',
     'apps.manager',
+    'apps.teacher',
+    'apps.student',
     'apps.users',
     'rest_framework',
     'rest_framework_simplejwt',
@@ -84,6 +86,7 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
 
 
 # Password validation

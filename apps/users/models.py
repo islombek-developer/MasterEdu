@@ -154,7 +154,17 @@ class Attendance(models.Model):
         
     def __str__(self):
         return f"{self.student} - {self.date} - {'Present' if self.status else 'Absent'}"
-    
+
+
+class StudentDebt(models.Model):
+    student = models.OneToOneField(Student, on_delete=models.CASCADE, related_name="debt")
+    total_debt = models.IntegerField(default=0) 
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.student.user.get_full_name()} - {self.total_debt} so‘m"
+
 
 class DailyPayment(models.Model):
     group = models.ForeignKey(Group, on_delete=models.CASCADE, related_name='payments')
@@ -174,6 +184,10 @@ class DailyPayment(models.Model):
             payment=self,
             amount=self.paid_amount
         )
+        debt, created = StudentDebt.objects.get_or_create(student=self.student)
+        total_remaining = DailyPayment.objects.filter(student=self.student).aggregate(Sum('remaining_amount'))['remaining_amount__sum'] or 0
+        debt.total_debt = total_remaining
+        debt.save()
 
     def __str__(self):
         return f"{self.student.first_name} - {self.payment_date} - {self.paid_amount}"
@@ -203,6 +217,7 @@ class Schedule(models.Model):
     
 class Notification(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
+    group = models.ForeignKey(Group,on_delete=models.CASCADE,blank=True, null=True)
     title = models.CharField(max_length=255)
     message = models.TextField()
     is_read = models.BooleanField(default=False,blank=True, null=True)
@@ -210,3 +225,21 @@ class Notification(models.Model):
 
     def __str__(self):
         return f"{self.user.full_name} - {self.title}"
+
+class Expense(models.Model):
+    category = models.CharField(max_length=100)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    date = models.DateField(auto_now_add=True)
+    description = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.category} - {self.amount} so'm ({self.date})"
+    
+class Salary(models.Model):
+    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    month = models.CharField(max_length=20)
+    paid_date = models.DateField(auto_now_add=True)
+
+    def __str__(self):
+        return f'{self.user.first_name}'
