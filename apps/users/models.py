@@ -236,10 +236,18 @@ class Expense(models.Model):
         return f"{self.category} - {self.amount} so'm ({self.date})"
     
 class Salary(models.Model):
-    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     month = models.CharField(max_length=20)
     paid_date = models.DateField(auto_now_add=True)
+
+
+    def save(self, *args, **kwargs):
+        if self.user.user_role in ['teacher', 'admin']:
+            super().save(*args, **kwargs) 
+        else:
+            raise ValueError("Faqat teacher va admin foydalanuvchilar uchun ma'lumot qo'shish mumkin")
+
 
     def __str__(self):
         return f'{self.user.first_name}'
