@@ -53,6 +53,11 @@ class User(AbstractUser):
     
     def save(self, *args, **kwargs):
         self.check_hash_password()
+        
+        # Faqat admin rolida bo'lgan foydalanuvchilar filialga ega bo'lishi mumkin
+        if self.user_role != 'admin' and self.branch is not None:
+            self.branch = None
+            
         super().save(*args, **kwargs)
         
         if self.user_role == 'teacher' and not hasattr(self, 'teacher'):
@@ -73,14 +78,20 @@ class User(AbstractUser):
         elif self.user_role == 'admin':
             return (user.user_role in ['teacher', 'student']) and user.branch == self.branch
         return False
+        
+    def can_create_branch(self):
+        return self.user_role in ['owner', 'admin']
+        
+    def can_create_teacher(self):
+        return self.user_role in ['owner', 'admin']
 
     def __str__(self):
         return f"{self.username} ({self.get_user_role_display()})"
 
 
 class Teacher(models.Model):
-    branch = models.ForeignKey(Branch, on_delete=models.SET_NULL, null=True, blank=True, related_name='teacher')
     user = models.OneToOneField(User, on_delete=models.CASCADE)
+    subject = models.CharField(max_length=100)
     date_of_birth = models.DateField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -91,17 +102,13 @@ class Teacher(models.Model):
             return self.user.managed_by
         return None
     
-    # @property
-    # def branch(self):
-    #     return self.user.branch
+    @property
+    def branch(self):
+        # O'qituvchi filiali - bu uning adminining filialidir
+        return self.user.branch or (self.admin.branch if self.admin else None)
     
     def get_full_name(self):
         return f"{self.user.first_name} {self.user.last_name}"
-    @receiver(post_save, sender=User)
-
-    def create_teacher(sender, instance, created, **kwargs):
-        if created and instance.user_role == 'teacher':
-            Teacher.objects.create(user=instance)
 
     def __str__(self):
         return self.get_full_name()
@@ -116,8 +123,8 @@ class Group(models.Model):
     teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE, related_name='teacher_groups')
     title = models.CharField(max_length=150)
     week = models.CharField(max_length=15, choices=WEEK_CHOISE, default='juft')
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField()
+    updated_at = models.DateTimeField()
 
     def __str__(self):
         return f"{self.title} - {self.teacher.get_full_name()} "
@@ -251,3 +258,16 @@ class Salary(models.Model):
 
     def __str__(self):
         return f'{self.user.first_name}'
+
+class Satus(models.TextChoices):
+    PRESENT = 'present', 'Present'
+    ABSENT = 'absent', 'Absent'
+    LATE = 'late', 'Late'
+
+
+class AttendanceReport(models.Model):
+    attendance = models.ForeignKey(Attendance, on_delete=models.CASCADE, related_name='reports')
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='attendance_reports')
+    status = models.CharField(choices=Satus.choices, max_length=10, default=Satus.ABSENT)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
