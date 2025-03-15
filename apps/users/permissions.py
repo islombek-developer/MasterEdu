@@ -7,11 +7,9 @@ class IsOwnerOrAdmin(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         user = request.user
         
-        # Owner can access everything
         if user.user_role == 'owner':
             return True
             
-        # Admin can only access their own branch or users in their branch
         if user.user_role == 'admin':
             if isinstance(obj, Branch):
                 return obj.id == user.branch.id if user.branch else False

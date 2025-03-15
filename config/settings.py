@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'apps.users',
     'rest_framework',
     'rest_framework_simplejwt',
+    'drf_spectacular',
 ]
 
 MIDDLEWARE = [
@@ -87,6 +88,9 @@ DATABASES = {
     }
 }
 
+REST_FRAMEWORK = {
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',  # To'g'ri bo'lishi kerak
+}
 
 
 # Password validation
@@ -166,7 +170,9 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.TokenAuthentication",
         "rest_framework.authentication.BasicAuthentication",
         "rest_framework.authentication.SessionAuthentication",
-    )
+
+    ),
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
  
 }
 REST_FRAMEWORK = {

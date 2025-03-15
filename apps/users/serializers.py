@@ -16,7 +16,12 @@ class Teacherseritalizer(serializers.ModelSerializer):
 
     def get_full_name(self, obj):
             return obj.get_full_name()
-        
+    
+class Groupserializers(serializers.ModelSerializer):
+    teacher = Teacherseritalizer()
+    class Meta:
+        model = Group
+        fields = '__all__'
 
 class Userserializers(serializers.ModelSerializer):
     branch_name = serializers.SerializerMethodField()

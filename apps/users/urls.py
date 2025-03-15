@@ -6,6 +6,8 @@ from django.urls import path,include
 from rest_framework.routers import DefaultRouter
 from apps.users.views import BranchViewSet,TeacherViewSet,UseradminViewSet
 
+
+
 router = DefaultRouter()
 router.include_root_view = False
 
@@ -23,7 +25,7 @@ schema_view = get_schema_view(
 )
 
 urlpatterns = [
-    
+   
    path('',include(router.urls)),
    path('branchs/', BranchViewSet.as_view({'get': 'list','post':'create'}), name='restaurant-detail'),
    path('branch/<int:id>',BranchViewSet.as_view({'get': 'retrieve', 'delete': 'destroy'})),
@@ -34,5 +36,6 @@ urlpatterns = [
    path('swagger.<format>/', schema_view.without_ui(cache_timeout=0), name='schema-json'),
    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
+
  
 ]

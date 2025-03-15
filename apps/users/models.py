@@ -54,7 +54,6 @@ class User(AbstractUser):
     def save(self, *args, **kwargs):
         self.check_hash_password()
         
-        # Faqat admin rolida bo'lgan foydalanuvchilar filialga ega bo'lishi mumkin
         if self.user_role != 'admin' and self.branch is not None:
             self.branch = None
             
@@ -104,7 +103,7 @@ class Teacher(models.Model):
     
     @property
     def branch(self):
-        # O'qituvchi filiali - bu uning adminining filialidir
+
         return self.user.branch or (self.admin.branch if self.admin else None)
     
     def get_full_name(self):
