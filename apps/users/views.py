@@ -20,7 +20,7 @@ class BranchViewSet(viewsets.ModelViewSet):
         if user.user_role == 'owner':
             return Branch.objects.all()
         elif user.user_role == 'admin':
-            return Branch.objects.filter(id=user.branch.id) if user.branch else Branch.objects.none()
+            return Branch.objects.filter(id__in=user.branch.values_list('id', flat=True))
         return Branch.objects.none()
     
     def perform_create(self, serializer):
@@ -59,13 +59,10 @@ class TeacherViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         if user.user_role == 'owner':
-            return User.objects.filter(user_role='teacher')
+            return Teacher.objects.all()
         elif user.user_role == 'admin':
-            return User.objects.filter(
-                user_role='teacher',
-                branch=user.branch
-            ) if user.branch else User.objects.none()
-        return User.objects.none()
+            return Teacher.objects.filter(user__branch__in=user.branch.all())
+        return Teacher.objects.none()
     
     def perform_create(self, serializer):
         user_data = serializer.validated_data

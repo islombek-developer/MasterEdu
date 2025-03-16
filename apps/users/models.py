@@ -26,13 +26,14 @@ class User(AbstractUser):
         ('admin', 'admin'),
         ('teacher', 'teacher'),
         ('student', 'student'),
+        ('parent', 'parent'),
     )
     image = models.ImageField(upload_to='profile_pics/', blank=True, null=True, default='profile_pics/default.jpg')
     phone_number = models.CharField(max_length=13, blank=True, null=True)
     address = models.CharField(max_length=200, blank=True, null=True)
     jobs = models.CharField(max_length=200, blank=True, null=True)
     user_role = models.CharField(max_length=100, choices=USER_ROLE, default="student")
-    branch = models.ForeignKey(Branch, on_delete=models.SET_NULL, null=True, blank=True, related_name='users')
+    branch = models.ManyToManyField(Branch,  null=True, blank=True, related_name='users')
     created_by = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='created_users')
     managed_by = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='managed_users')
     
@@ -53,20 +54,19 @@ class User(AbstractUser):
     
     def save(self, *args, **kwargs):
         self.check_hash_password()
-        
-        if self.user_role != 'admin' and self.branch is not None:
-            self.branch = None
-            
         super().save(*args, **kwargs)
         
         if self.user_role == 'teacher' and not hasattr(self, 'teacher'):
             Teacher.objects.create(user=self)
+            
+        if self.user_role != 'admin':
+            self.branch.clear()  
     
     def get_managed_teachers(self):
         if self.user_role == 'admin':
             return User.objects.filter(
                 user_role='teacher',
-                branch=self.branch,
+                branch__in=self.branch.all(),
                 managed_by=self
             )
         return User.objects.none()
@@ -75,7 +75,7 @@ class User(AbstractUser):
         if self.user_role == 'owner':
             return user.user_role != 'owner' 
         elif self.user_role == 'admin':
-            return (user.user_role in ['teacher', 'student']) and user.branch == self.branch
+            return (user.user_role in ['teacher', 'student']) and user.branch.filter(id__in=self.branch.all()).exists()
         return False
         
     def can_create_branch(self):
@@ -90,7 +90,7 @@ class User(AbstractUser):
 
 class Teacher(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    subject = models.CharField(max_length=100)
+    # subject = models.CharField(max_length=100)
     date_of_birth = models.DateField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

@@ -17,8 +17,15 @@ class Question(models.Model):
 
 class Answer(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name="answers")
+    title = models.TextField() 
     answer_text = models.CharField(max_length=255)  
-    is_correct = models.BooleanField(default=False)  
+    is_correct = models.BooleanField(default=False) 
+    bnswer_text = models.CharField(max_length=255)  
+    bis_correct = models.BooleanField(default=False) 
+    cnswer_text = models.CharField(max_length=255)  
+    cis_correct = models.BooleanField(default=False) 
+    dnswer_text = models.CharField(max_length=255)  
+    dis_correct = models.BooleanField(default=False) 
     def __str__(self):
         return self.answer_text
 
@@ -29,7 +36,7 @@ class Answer(models.Model):
 
 class WrittenAnswer(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name="written_answers")
-    student_name = models.ForeignKey(Student,on_delete=models.CASCADE) 
+    title = models.TextField() 
     answer_text = models.TextField()  
     def __str__(self):
         return f"{self.student_name} - {self.question.title[:30]}..."

@@ -3,6 +3,10 @@ from .models import (Branch,User,Teacher,Student,DailyPayment,Attendance,Group,
 StudentPaymentHistory, Schedule, Notification,StudentDebt,Salary,Expense,AttendanceReport)
 
 
+class Loginserializers(serializers.Serializer):
+    username = serializers.CharField()
+    password = serializers.CharField()
+
 class BranchSerializer(serializers.ModelSerializer):
     class Meta:
         model = Branch
