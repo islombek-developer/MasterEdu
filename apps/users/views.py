@@ -7,12 +7,13 @@ from .models import Branch, User, Teacher
 from .serializers import BranchSerializer,Teacherseritalizer,Userserializers
 from rest_framework.decorators import action
 from .permissions import IsOwner,IsOwnerOrAdmin
-
+from .paginations import CustomPagination
 
 class BranchViewSet(viewsets.ModelViewSet):
     queryset = Branch.objects.all()
     serializer_class = BranchSerializer
     permission_classes = [IsOwnerOrAdmin]
+    pagination_class = CustomPagination
     lookup_field = 'id'
     
     def get_queryset(self):

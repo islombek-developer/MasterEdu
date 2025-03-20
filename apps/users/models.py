@@ -10,6 +10,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 
+
 class Branch(models.Model):
     name = models.CharField(max_length=150)
     address = models.CharField(max_length=200, blank=True, null=True)
