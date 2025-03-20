@@ -5,7 +5,7 @@ from drf_yasg import openapi
 from django.urls import path,include
 from rest_framework.routers import DefaultRouter
 from apps.users.views import BranchViewSet,TeacherViewSet,UseradminViewSet
-
+from .login import LoginAPIView,Registerview
 
 
 router = DefaultRouter()
@@ -34,7 +34,8 @@ urlpatterns = [
    path('user-admins/', UseradminViewSet.as_view({'get': 'list','post':'create'}), name='restaurant-detail'),
    path('user-admin/<int:id>',UseradminViewSet.as_view({'get': 'retrieve', 'delete': 'destroy'})),
 
-
+   path('login/', LoginAPIView.as_view()),
+   path('register/', Registerview.as_view()),
    path('swagger.<format>/', schema_view.without_ui(cache_timeout=0), name='schema-json'),
    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),

@@ -25,7 +25,7 @@ class LoginAPIView(views.APIView):
 
                 'user':{
                     'id':user.id,
-                    'username':user.username,
+                    'phone_number':user.phone_number,
                     'password':user.password,
                     'first_name':user.first_name,
                     'last_name':user.last_name,
@@ -47,3 +47,16 @@ class LoginAPIView(views.APIView):
         return Response(response_data,status=status.HTTP_400_BAD_REQUEST)
             
 
+class Registerview(generics.CreateAPIView):
+    serializer_class=RegistrationSerializer
+    permission_classes =[AllowAny]
+
+    def create(self,request,*args,**kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response({"message": "Foydalanuvchi muvaffaqiyatli ro'yxatdan o'tdi", "user": serializer.data},
+            status=status.HTTP_201_CREATED,
+            headers=headers
+        )

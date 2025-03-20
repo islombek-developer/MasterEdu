@@ -22,6 +22,8 @@ class Branch(models.Model):
         return self.name
 
 class User(AbstractUser):
+
+
     USER_ROLE = (
         ('owner', 'owner'),
         ('admin', 'admin'),
@@ -30,15 +32,14 @@ class User(AbstractUser):
         ('parent', 'parent'),
     )
     image = models.ImageField(upload_to='profile_pics/', blank=True, null=True, default='profile_pics/default.jpg')
-    phone_number = models.CharField(max_length=13, blank=True, null=True)
+    phone_number = models.CharField(max_length=13)
     address = models.CharField(max_length=200, blank=True, null=True)
     jobs = models.CharField(max_length=200, blank=True, null=True)
     user_role = models.CharField(max_length=100, choices=USER_ROLE, default="student")
-    branch = models.ManyToManyField(Branch,  null=True, blank=True, related_name='users')
+    branch = models.ManyToManyField(Branch,   blank=True, related_name='users')
     created_by = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='created_users')
     managed_by = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='managed_users')
-    
-    @property
+ 
     def full_name(self):
         return f'{self.first_name}--{self.last_name}'
     
@@ -55,13 +56,16 @@ class User(AbstractUser):
     
     def save(self, *args, **kwargs):
         self.check_hash_password()
-        super().save(*args, **kwargs)
+
         
         if self.user_role == 'teacher' and not hasattr(self, 'teacher'):
             Teacher.objects.create(user=self)
             
         if self.user_role != 'admin':
             self.branch.clear()  
+        if not self.username:
+            self.username=self.phone_number
+        super().save(*args,**kwargs)
     
     def get_managed_teachers(self):
         if self.user_role == 'admin':
@@ -84,6 +88,19 @@ class User(AbstractUser):
         
     def can_create_teacher(self):
         return self.user_role in ['owner', 'admin']
+    def create(self, validated_data):
+    # Many-to-Many maydonlarini ajratib olish
+        groups_data = validated_data.pop('groups', [])  # groups ni olish
+        permissions_data = validated_data.pop('user_permissions', [])  # permissions ni olish
+
+        # User obyektini yaratish va saqlash
+        user = User.objects.create_user(**validated_data)
+
+        # Many-to-Many maydonlarini biriktirish
+        user.groups.set(groups_data)
+        user.user_permissions.set(permissions_data)
+
+        return user
 
     def __str__(self):
         return f"{self.username} ({self.get_user_role_display()})"
@@ -91,7 +108,6 @@ class User(AbstractUser):
 
 class Teacher(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    # subject = models.CharField(max_length=100)
     date_of_birth = models.DateField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

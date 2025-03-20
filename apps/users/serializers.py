@@ -4,60 +4,77 @@ from django.contrib.auth.password_validation import validate_password
 from .models import (Branch,User,Teacher,Student,DailyPayment,Attendance,Group,
 StudentPaymentHistory, Schedule, Notification,StudentDebt,Salary,Expense,AttendanceReport)
 
+from django.contrib.auth import authenticate
+from rest_framework import serializers
 
 class Loginserializers(serializers.Serializer):
-    username = serializers.CharField()
-    password = serializers.CharField(write_only = True)
+    phone_number = serializers.CharField()
+    password = serializers.CharField(write_only=True)
 
     def validate(self, data):
-        username = data.get('username')
+        phone_number = data.get('phone_number')
         password = data.get('password')
-        
-        if username and password:
-            user = aauthenticate(username=username,password=password)
+
+        if phone_number and password:
+            # Telefon raqam orqali autentifikatsiya qilish
+            user = authenticate(username=phone_number, password=password)
+            
             if user:
                 if not user.is_active:
                     raise serializers.ValidationError("Foydalanuvchi hisobi o'chirilgan")
-                data['user']=user
+                
+                data['user'] = user
                 return data
-            raise serializers.ValidationError("parol yoki username xato")
-        raise serializers.ValidationError("Foydalanuvchi nomi va parolni kiritish kerak")
+
+            raise serializers.ValidationError("Telefon raqam yoki parol noto‘g‘ri")
+        
+        raise serializers.ValidationError("Telefon raqam va parolni kiritish shart")
 
 
 class RegistrationSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
-    password2 = serializers.CharField(write_only=True, required=True)
+    password2 = serializers.CharField(write_only=True)  # Parolni tasdiqlash
+    phone_number = serializers.CharField(required=True)  # Telefon raqamini talab qilish
 
     class Meta:
         model = User
-        fields = '__all__'
+        fields = ['phone_number', 'password', 'password2', 'email', 'first_name', 'last_name', 'user_role']
+        extra_kwargs = {
+            'password': {'write_only': True}
+        }
 
-    def validate(self, attrs):
-        if attrs['password'] != attrs['username']:
-            raise serializers.ValidationError({'password':'parol moskelmadi'})
-        if attrs['user_role'] not in attrs['teacher','admin']:
-            raise serializers.ValidationError({'user_role':'user_role tanlang teacher yoki admin'})
-        return attrs
-    
+    def validate(self, data):
+        # Parollar mos kelishini tekshirish
+        if data['password'] != data['password2']:
+            raise serializers.ValidationError({"password2": "Parollar mos kelmadi."})
+
+        # Parol uzunligini tekshirish (kamida 4 belgi)
+        if len(data['password']) < 4:
+            raise serializers.ValidationError({"password": "Parol kamida 4 belgidan iborat bo'lishi kerak."})
+
+        # Telefon raqamini takrorlanmasligini tekshirish
+        if User.objects.filter(phone_number=data['phone_number']).exists():
+            raise serializers.ValidationError({"phone_number": "Ushbu telefon raqam bilan foydalanuvchi allaqachon mavjud."})
+
+        return data
+
     def create(self, validated_data):
-        validated_data.pop('password2')
+        validated_data.pop('password2')  # Parol tasdiqlashni olib tashlash
 
-        user=User.objects.create(
-            username=validated_data['username'],
+        # `username` ni `phone_number` ga teng qilib saqlash
+        user = User.objects.create_user(
+            username=validated_data['phone_number'],  
+            phone_number=validated_data['phone_number'],  
+            email=validated_data.get('email', ''),
             first_name=validated_data.get('first_name', ''),
             last_name=validated_data.get('last_name', ''),
-            image=validated_data.get('image', None),
-            phone_number=validated_data.get('phone_number', ''),
-            address=validated_data.get('address', ''),
-            jobs=validated_data.get('jobs', ''),
-            user_role=validated_data['user_role']
+            user_role=validated_data.get('user_role', ''),
+            password=validated_data['password']  
         )
-        user.set_password(validated_data['password'])
-        user.save()
-
-    
         
+        return user
 
+
+ 
 class BranchSerializer(serializers.ModelSerializer):
     class Meta:
         model = Branch
