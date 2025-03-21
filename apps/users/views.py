@@ -1,6 +1,6 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status,viewsets,validators,permissions
+from rest_framework import status,viewsets,validators,permissions,generics
 from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
 from .models import Branch, User, Teacher
@@ -101,26 +101,24 @@ class TeacherViewSet(viewsets.ModelViewSet):
         return super().destroy(request, *args, **kwargs)
 
 
-class UseradminViewSet(viewsets.ModelViewSet):
+class UseradminViewSet(generics.RetrieveUpdateDestroyAPIView):
     queryset = User.objects.filter(user_role='admin')
     serializer_class = Userserializers
     permission_classes = [IsOwner]
-    
-    def perform_create(self, serializer):
-        user_data = serializer.validated_data
-        user_data['user_role'] = 'admin'
-        
-        serializer.save(created_by=self.request.user)
-    
-    @action(detail=True, methods=['post'])
-    def assign_to_branch(self, request, pk=None):
-        admin = self.get_object()
-        branch_id = request.data.get('branch_id')
-        
-        branch = get_object_or_404(Branch, pk=branch_id)
-        
-        if request.user.user_role == 'owner':
-            admin.branch = branch
-            admin.save()
-            return Response({'status': 'admin assigned to branch'})
-        return Response({'error': 'You cannot assign admin to branch'}, status=status.HTTP_403_FORBIDDEN)
+    lookup_field = 'id'
+    def get(self, request, *args, **kwargs):
+        return self.retrieve(request, *args, **kwargs)
+
+    def put(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)
+
+    def patch(self, request, *args, **kwargs):
+        return self.partial_update(request, *args, **kwargs)
+
+    def delete(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)
+
+class Useradminview(generics.ListAPIView):
+    queryset = User.objects.filter(user_role='admin')
+    serializer_class = Userserializers
+    permission_classes = [IsOwner]

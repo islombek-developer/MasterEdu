@@ -97,7 +97,7 @@ class Groupserializers(serializers.ModelSerializer):
         fields = '__all__'
 
 class Userserializers(serializers.ModelSerializer):
-    branch_name = serializers.SerializerMethodField()
+    branch = serializers.SerializerMethodField()
     teacher_details = serializers.SerializerMethodField()
 
     class Meta:
