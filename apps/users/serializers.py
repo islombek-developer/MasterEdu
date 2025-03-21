@@ -16,7 +16,6 @@ class Loginserializers(serializers.Serializer):
         password = data.get('password')
 
         if phone_number and password:
-            # Telefon raqam orqali autentifikatsiya qilish
             user = authenticate(username=phone_number, password=password)
             
             if user:
@@ -37,7 +36,7 @@ class RegistrationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['phone_number', 'password', 'password2', 'email', 'first_name', 'last_name', 'user_role']
+        fields = ['phone_number', 'password', 'password2',  'first_name', 'last_name', 'user_role']
         extra_kwargs = {
             'password': {'write_only': True}
         }

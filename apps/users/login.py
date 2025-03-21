@@ -17,7 +17,7 @@ class LoginAPIView(APIView):
     serializer_class = Loginserializers
 
     def post(self, request):
-        serializer = self.serializer_class(data=request.data)  # Corrected keyword argument
+        serializer = self.serializer_class(data=request.data)  
         if serializer.is_valid():
             user = serializer.validated_data['user']
             refresh = RefreshToken.for_user(user)
@@ -48,7 +48,7 @@ class LoginAPIView(APIView):
                     pass
 
             return Response(response_data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)  # Return serializer errors if invalid
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)  
 
 class Registerview(generics.CreateAPIView):
     serializer_class=RegistrationSerializer
