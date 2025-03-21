@@ -6,46 +6,49 @@ from rest_framework.response import Response
 
 
 
-class LoginAPIView(views.APIView):
+from rest_framework.views import APIView
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework_simplejwt.tokens import RefreshToken
+
+class LoginAPIView(APIView):
     permission_classes = [AllowAny]
     serializer_class = Loginserializers
 
-    def post(self,request):
-        serializers = self.serializer_class(dats = request.data)
-        if serializers.is_valid():
-            user = serializers.validated_data['user']
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)  # Corrected keyword argument
+        if serializer.is_valid():
+            user = serializer.validated_data['user']
             refresh = RefreshToken.for_user(user)
 
             response_data = {
-                'status':'success',
-                'token':{
-                    'refresh':str(refresh),
-                    'access':str(refresh.access_token),
+                'status': 'success',
+                'token': {
+                    'refresh': str(refresh),
+                    'access': str(refresh.access_token),
                 },
-
-                'user':{
-                    'id':user.id,
-                    'phone_number':user.phone_number,
-                    'password':user.password,
-                    'first_name':user.first_name,
-                    'last_name':user.last_name,
-                    'user_role':user.user_role,
-
+                'user': {
+                    'id': user.id,
+                    'phone_number': user.phone_number,
+                    'password': user.password,
+                    'first_name': user.first_name,
+                    'last_name': user.last_name,
+                    'user_role': user.user_role,
                 }
             }
+
             if user.user_role == 'teacher':
-                
                 try:
-                    teacher=user.teacher
+                    teacher = user.teacher
                     response_data['teacher'] = {
-                        'id':user.id
+                        'id': user.id
                     }
                 except:
                     pass
 
-            return Response(response_data,status=status.HTTP_200_OK)
-        return Response(response_data,status=status.HTTP_400_BAD_REQUEST)
-            
+            return Response(response_data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)  # Return serializer errors if invalid
 
 class Registerview(generics.CreateAPIView):
     serializer_class=RegistrationSerializer

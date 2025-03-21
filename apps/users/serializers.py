@@ -3,7 +3,7 @@ from django.contrib.auth import aauthenticate
 from django.contrib.auth.password_validation import validate_password
 from .models import (Branch,User,Teacher,Student,DailyPayment,Attendance,Group,
 StudentPaymentHistory, Schedule, Notification,StudentDebt,Salary,Expense,AttendanceReport)
-
+from django.db.models.fields.related_descriptors import ManyToManyDescriptor
 from django.contrib.auth import authenticate
 from rest_framework import serializers
 
@@ -32,8 +32,8 @@ class Loginserializers(serializers.Serializer):
 
 
 class RegistrationSerializer(serializers.ModelSerializer):
-    password2 = serializers.CharField(write_only=True)  # Parolni tasdiqlash
-    phone_number = serializers.CharField(required=True)  # Telefon raqamini talab qilish
+    password2 = serializers.CharField(write_only=True)  
+    phone_number = serializers.CharField(required=True)  
 
     class Meta:
         model = User
@@ -43,24 +43,25 @@ class RegistrationSerializer(serializers.ModelSerializer):
         }
 
     def validate(self, data):
-        # Parollar mos kelishini tekshirish
         if data['password'] != data['password2']:
             raise serializers.ValidationError({"password2": "Parollar mos kelmadi."})
 
-        # Parol uzunligini tekshirish (kamida 4 belgi)
+     
         if len(data['password']) < 4:
             raise serializers.ValidationError({"password": "Parol kamida 4 belgidan iborat bo'lishi kerak."})
 
-        # Telefon raqamini takrorlanmasligini tekshirish
         if User.objects.filter(phone_number=data['phone_number']).exists():
             raise serializers.ValidationError({"phone_number": "Ushbu telefon raqam bilan foydalanuvchi allaqachon mavjud."})
 
         return data
 
     def create(self, validated_data):
-        validated_data.pop('password2')  # Parol tasdiqlashni olib tashlash
+        validated_data.pop('password2')  
+        m2m_fields = {}
+        for field in self.Meta.model._meta.many_to_many:
+            if field.name in validated_data:
+                m2m_fields[field.name] = validated_data.pop(field.name)
 
-        # `username` ni `phone_number` ga teng qilib saqlash
         user = User.objects.create_user(
             username=validated_data['phone_number'],  
             phone_number=validated_data['phone_number'],  
@@ -70,9 +71,10 @@ class RegistrationSerializer(serializers.ModelSerializer):
             user_role=validated_data.get('user_role', ''),
             password=validated_data['password']  
         )
-        
-        return user
+        for field_name, value in m2m_fields.items():
+            getattr(user, field_name).set(value)
 
+        return user
 
  
 class BranchSerializer(serializers.ModelSerializer):
@@ -119,13 +121,24 @@ class Userserializers(serializers.ModelSerializer):
          return None
 
     def create(self, validated_data):
-        password = validated_data.pop('password', None)
-        user = User.objects.create(**validated_data)
+        validated_data.pop('password2')  
+        m2m_fields = {}
+        for field_name, field_value in list(validated_data.items()):
+            if isinstance(getattr(User, field_name, None), ManyToManyDescriptor):
+                m2m_fields[field_name] = validated_data.pop(field_name)
         
-        if password:
-            user.set_password(password)
-            user.save()
-            
+        user = User.objects.create_user(
+            username=validated_data['phone_number'],
+            phone_number=validated_data['phone_number'],
+            email=validated_data.get('email', ''),
+            first_name=validated_data.get('first_name', ''),
+            last_name=validated_data.get('last_name', ''),
+            user_role=validated_data.get('user_role', ''),
+            password=validated_data['password']
+        )
+        for field_name, value in m2m_fields.items():
+            getattr(user, field_name).set(value)
+        
         return user
     
     def update(self, instance, validated_data):

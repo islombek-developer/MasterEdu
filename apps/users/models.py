@@ -56,16 +56,16 @@ class User(AbstractUser):
     
     def save(self, *args, **kwargs):
         self.check_hash_password()
-
+        
+        if not self.username:
+            self.username = self.phone_number
+        
+        super().save(*args, **kwargs)
+        if self.user_role != 'admin':
+            self.branch.clear()
         
         if self.user_role == 'teacher' and not hasattr(self, 'teacher'):
             Teacher.objects.create(user=self)
-            
-        if self.user_role != 'admin':
-            self.branch.clear()  
-        if not self.username:
-            self.username=self.phone_number
-        super().save(*args,**kwargs)
     
     def get_managed_teachers(self):
         if self.user_role == 'admin':
@@ -89,14 +89,9 @@ class User(AbstractUser):
     def can_create_teacher(self):
         return self.user_role in ['owner', 'admin']
     def create(self, validated_data):
-    # Many-to-Many maydonlarini ajratib olish
-        groups_data = validated_data.pop('groups', [])  # groups ni olish
-        permissions_data = validated_data.pop('user_permissions', [])  # permissions ni olish
-
-        # User obyektini yaratish va saqlash
+        groups_data = validated_data.pop('groups', [])  
+        permissions_data = validated_data.pop('user_permissions', [])  
         user = User.objects.create_user(**validated_data)
-
-        # Many-to-Many maydonlarini biriktirish
         user.groups.set(groups_data)
         user.user_permissions.set(permissions_data)
 
