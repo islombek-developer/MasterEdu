@@ -92,9 +92,13 @@ class Teacherseritalizer(serializers.ModelSerializer):
     
 class Groupserializers(serializers.ModelSerializer):
     teacher = Teacherseritalizer()
+    start = serializers.TimeField(format="%H:%M:%S")
+    end = serializers.TimeField(format="%H:%M:%S")
     class Meta:
         model = Group
         fields = '__all__'
+
+  
 
 class Userserializers(serializers.ModelSerializer):
     branch = serializers.SerializerMethodField()

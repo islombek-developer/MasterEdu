@@ -3,11 +3,12 @@ from rest_framework.response import Response
 from rest_framework import status,viewsets,validators,permissions,generics
 from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
-from .models import Branch, User, Teacher
-from .serializers import BranchSerializer,Teacherseritalizer,Userserializers
+from .models import Branch, User, Teacher,Group
+from .serializers import BranchSerializer,Teacherseritalizer,Userserializers,Groupserializers
 from rest_framework.decorators import action
 from .permissions import IsOwner,IsOwnerOrAdmin
 from .paginations import CustomPagination
+from datetime import datetime,timedelta,timezone,time
 
 class BranchViewSet(viewsets.ModelViewSet):
     queryset = Branch.objects.all()
@@ -122,3 +123,7 @@ class Useradminview(generics.ListAPIView):
     queryset = User.objects.filter(user_role='admin')
     serializer_class = Userserializers
     permission_classes = [IsOwner]
+
+class Groupviewset(viewsets.ModelViewSet):
+    queryset = Group.objects.all()
+    serializer_class = Groupserializers

@@ -134,8 +134,8 @@ class Group(models.Model):
     teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE, related_name='teacher_groups')
     title = models.CharField(max_length=150)
     week = models.CharField(max_length=15, choices=WEEK_CHOISE, default='juft')
-    created_at = models.DateTimeField()
-    updated_at = models.DateTimeField()
+    start = models.TimeField()
+    end = models.TimeField()
 
     def __str__(self):
         return f"{self.title} - {self.teacher.get_full_name()} "
