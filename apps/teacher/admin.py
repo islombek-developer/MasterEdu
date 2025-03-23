@@ -42,7 +42,3 @@ class UserAnswerAdmin(admin.ModelAdmin):
     list_display = ('attempt', 'question', 'selected_answer', 'written_answer', 'is_correct')
     list_filter = ('attempt__quiz', 'is_correct')
     search_fields = ('attempt__student__username', 'question__text')
-
-admin.site.site_header = "Quiz Management Admin"
-admin.site.site_title = "Quiz Admin"
-admin.site.index_title = "Welcome to the Quiz Management Dashboard"
