@@ -57,7 +57,7 @@ class TeacherViewSet(viewsets.ModelViewSet):
     queryset = User.objects.filter(user_role='teacher')
     serializer_class = Teacherseritalizer
     permission_classes = [IsOwnerOrAdmin]
-    
+    pagination_class = CustomPagination
     def get_queryset(self):
         user = self.request.user
         if user.user_role == 'owner':
@@ -106,6 +106,7 @@ class UseradminViewSet(generics.RetrieveUpdateDestroyAPIView):
     queryset = User.objects.filter(user_role='admin')
     serializer_class = Userserializers
     permission_classes = [IsOwner]
+    pagination_class = CustomPagination
     lookup_field = 'id'
     def get(self, request, *args, **kwargs):
         return self.retrieve(request, *args, **kwargs)
@@ -123,7 +124,9 @@ class Useradminview(generics.ListAPIView):
     queryset = User.objects.filter(user_role='admin')
     serializer_class = Userserializers
     permission_classes = [IsOwner]
+    pagination_class = CustomPagination
 
 class Groupviewset(viewsets.ModelViewSet):
     queryset = Group.objects.all()
     serializer_class = Groupserializers
+    pagination_class = CustomPagination
