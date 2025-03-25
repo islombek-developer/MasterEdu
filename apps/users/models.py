@@ -124,6 +124,13 @@ class Teacher(models.Model):
     def __str__(self):
         return self.get_full_name()
 
+class Statusg(models.TextChoices):
+    archive = 'archive','Archive'
+    activ = 'activ','Activ'
+
+class Sciences(models.Model):
+    name = models.CharField(max_length=150)
+    status = models.CharField(choices=Statusg.choices,max_length=15,default=Statusg.activ)
 
 class Group(models.Model):
     WEEK_CHOISE = (
@@ -132,8 +139,10 @@ class Group(models.Model):
         ('INDUVIDUAL', 'INDUVIDUAL')
     )
     teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE, related_name='teacher_groups')
+    sciences  = models.ForeignKey(Sciences,on_delete=models.CASCADE)  
     title = models.CharField(max_length=150)
     week = models.CharField(max_length=15, choices=WEEK_CHOISE, default='juft')
+    status = models.CharField(choices=Statusg.choices, max_length=15 ,default=Statusg.activ)
     start = models.TimeField()
     end = models.TimeField()
 

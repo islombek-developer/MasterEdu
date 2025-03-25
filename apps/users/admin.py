@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import (Branch,User,Teacher,Student,DailyPayment,Attendance,Group,
+from .models import (Branch,User,Teacher,Student,DailyPayment,Attendance,Group,Sciences,
 StudentPaymentHistory, Schedule, Notification,StudentDebt,Salary,Expense,AttendanceReport)
 
 @admin.register(StudentPaymentHistory)
@@ -48,3 +48,4 @@ admin.site.register(Salary)
 admin.site.register(StudentDebt)
 admin.site.register(Expense)
 admin.site.register(AttendanceReport)
+admin.site.register(Sciences)

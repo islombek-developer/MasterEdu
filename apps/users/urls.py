@@ -27,13 +27,13 @@ schema_view = get_schema_view(
 urlpatterns = [
    
    path('',include(router.urls)),
-   path('branchs/', BranchViewSet.as_view({'get': 'list','post':'create'}), name='restaurant-detail'),
+   path('branchs/', BranchViewSet.as_view({'get': 'list','post':'create'})),
    path('branch/<int:id>',BranchViewSet.as_view({'get': 'retrieve', 'delete': 'destroy'})),
-   path('teachers/', TeacherViewSet.as_view({'get': 'list','post':'create'}), name='restaurant-detail'),
+   path('teachers/', TeacherViewSet.as_view({'get': 'list','post':'create'})),
    path('teacher/<int:id>',TeacherViewSet.as_view({'get': 'retrieve', 'delete': 'destroy'})),
-   path('user-admin/<int:id>/', UseradminViewSet.as_view(), name='restaurant-detail'),
-   path('user-admins/', Useradminview.as_view(), name='restaurant-detail'),
-   path('groups/', Groupviewset.as_view({'get': 'list','post':'create'}), name='restaurant-detail'),
+   path('user-admin/<int:id>/', UseradminViewSet.as_view()),
+   path('user-admins/', Useradminview.as_view(), ),
+   path('groups/', Groupviewset.as_view({'get': 'list','post':'create'})),
    path('groups/<int:id>',Groupviewset.as_view({'get': 'retrieve', 'delete': 'destroy'})),
 
 
