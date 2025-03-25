@@ -4,7 +4,7 @@ from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from django.urls import path,include
 from rest_framework.routers import DefaultRouter
-from apps.users.views import BranchViewSet,TeacherViewSet,UseradminViewSet,Useradminview,Groupviewset
+from apps.users.views import BranchViewSet,TeacherViewSet,UseradminViewSet,Useradminview,Groupviewset,TeacherGroupsListAPIView
 from .login import LoginAPIView,Registerview
 
 
@@ -27,6 +27,7 @@ schema_view = get_schema_view(
 urlpatterns = [
    
    path('',include(router.urls)),
+
    path('branchs/', BranchViewSet.as_view({'get': 'list','post':'create'})),
    path('branch/<int:id>',BranchViewSet.as_view({'get': 'retrieve', 'delete': 'destroy'})),
    path('teachers/', TeacherViewSet.as_view({'get': 'list','post':'create'})),
@@ -36,6 +37,7 @@ urlpatterns = [
    path('groups/', Groupviewset.as_view({'get': 'list','post':'create'})),
    path('groups/<int:id>',Groupviewset.as_view({'get': 'retrieve', 'delete': 'destroy'})),
 
+    path('teachers/<int:teacher_id>/groups/', TeacherGroupsListAPIView.as_view()),
 
    path('login/', LoginAPIView.as_view()),
    path('register/', Registerview.as_view()),

@@ -10,6 +10,8 @@ from .permissions import IsOwner,IsOwnerOrAdmin
 from .paginations import CustomPagination
 from datetime import datetime,timedelta,timezone,time
 
+
+
 class BranchViewSet(viewsets.ModelViewSet):
     queryset = Branch.objects.all()
     serializer_class = BranchSerializer
@@ -105,7 +107,6 @@ class TeacherViewSet(viewsets.ModelViewSet):
 class UseradminViewSet(generics.RetrieveUpdateDestroyAPIView):
     queryset = User.objects.filter(user_role='admin')
     serializer_class = Userserializers
-    permission_classes = [IsOwner]
     pagination_class = CustomPagination
     lookup_field = 'id'
     def get(self, request, *args, **kwargs):
@@ -121,12 +122,35 @@ class UseradminViewSet(generics.RetrieveUpdateDestroyAPIView):
         return self.destroy(request, *args, **kwargs)
 
 class Useradminview(generics.ListAPIView):
-    queryset = User.objects.filter(user_role='admin')
+    queryset = User.objects.all()
     serializer_class = Userserializers
-    permission_classes = [IsOwner]
     pagination_class = CustomPagination
 
 class Groupviewset(viewsets.ModelViewSet):
     queryset = Group.objects.all()
     serializer_class = Groupserializers
     pagination_class = CustomPagination
+
+class TeacherGroupsListAPIView(generics.ListAPIView):
+    serializer_class = Groupserializers
+
+    def get_queryset(self):
+        teacher_id = self.kwargs.get('teacher_id')
+        return Group.objects.filter(teacher_id=teacher_id)
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        
+        try:
+            teacher = Teacher.objects.get(id=self.kwargs.get('teacher_id'))
+        except Teacher.DoesNotExist:
+            return Response({'error': 'Teacher not found'}, status=404)
+        serializer = self.get_serializer(queryset, many=True)
+        
+        return Response({
+            'teacher_id': teacher.id,
+            'teacher_name': teacher.first_name(),
+            'total_groups': queryset.count(),
+            'groups': serializer.data
+        })
+
