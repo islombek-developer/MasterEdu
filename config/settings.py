@@ -159,10 +159,11 @@ USE_TZ = True
 
 AUTH_USER_MODEL = 'users.User'
 STATIC_URL = 'static/'
-STATICFILES_DIRS=[
-    BASE_DIR / 'static',
-]
-STATIC_URL = '/static/'
+
+# STATICFILES_DIRS=[
+#     BASE_DIR / 'static',
+# ]
+
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 MEDIA_URL = '/media/'
