@@ -50,14 +50,18 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    # installed packege
     'drf_yasg',
+    'rest_framework',
+    'rest_framework_simplejwt',
+    'drf_spectacular',
+
+    # custom apps
     'apps.manager',
     'apps.teacher',
     'apps.student',
     'apps.users',
-    'rest_framework',
-    'rest_framework_simplejwt',
-    'drf_spectacular',
 ]
 
 MIDDLEWARE = [
