@@ -152,9 +152,6 @@ class Group(models.Model):
 
 class Student(models.Model):
     user = models.ForeignKey(User,on_delete=models.CASCADE)
-    first_name = models.CharField(max_length=150)
-    last_name = models.CharField(max_length=150)
-    phone_number = models.CharField(max_length=14, null=True, blank=True)
     home_phone = models.CharField(max_length=14, null=True, blank=True)
     group = models.ForeignKey(Group, on_delete=models.CASCADE, related_name='students')
     status = models.BooleanField(default=True)
