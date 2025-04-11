@@ -4,7 +4,7 @@ from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from django.urls import path,include
 from rest_framework.routers import DefaultRouter
-from api.users.views import BranchViewSet,TeacherViewSet,UseradminViewSet,Useradminview,Groupviewset,TeacherGroupsListAPIView
+from api.users.views.views import BranchViewSet,TeacherViewSet,UseradminViewSet,Useradminview,Groupviewset,TeacherGroupsListAPIView
 from .login import LoginAPIView,Registerview
 
 

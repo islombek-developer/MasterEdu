@@ -3,11 +3,11 @@ from rest_framework.response import Response
 from rest_framework import status,viewsets,validators,permissions,generics
 from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
-from ...apps.users.models import Branch, User, Teacher,Group
-from .serializer.serializers import BranchSerializer,Teacherseritalizer,Userserializers,Groupserializers
+from apps.users.models import Branch, User, Teacher,Group
+from api.users.serializer.serializers import BranchSerializer,Teacherseritalizer,Userserializers,Groupserializers
 from rest_framework.decorators import action
-from ...apps.users.permissions import IsOwner,IsOwnerOrAdmin
-from ...apps.users.paginations import CustomPagination
+from apps.users.permissions import IsOwner,IsOwnerOrAdmin
+from apps.users.paginations import CustomPagination
 from datetime import datetime,timedelta,timezone,time
 
 
@@ -153,4 +153,3 @@ class TeacherGroupsListAPIView(generics.ListAPIView):
             'total_groups': queryset.count(),
             'groups': serializer.data
         })
-

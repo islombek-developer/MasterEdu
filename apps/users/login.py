@@ -1,5 +1,5 @@
 from rest_framework import views,status,generics
-from ...api.users.serializer.serializers import Loginserializers,RegistrationSerializer
+from api.users.serializer.serializers import Loginserializers,RegistrationSerializer
 from rest_framework.permissions import AllowAny,IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.response import Response
