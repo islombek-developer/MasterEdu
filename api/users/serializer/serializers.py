@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth import aauthenticate
 from django.contrib.auth.password_validation import validate_password
-from ....apps.users.models import (Branch,User,Teacher,Student,DailyPayment,Attendance,Group,
+from apps.users.models import (Branch,User,Teacher,Student,DailyPayment,Attendance,Group,
 StudentPaymentHistory, Schedule, Notification,StudentDebt,Salary,Expense,AttendanceReport)
 from django.db.models.fields.related_descriptors import ManyToManyDescriptor
 from django.contrib.auth import authenticate
