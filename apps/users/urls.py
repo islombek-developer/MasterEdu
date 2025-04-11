@@ -28,19 +28,28 @@ urlpatterns = [
    
    path('',include(router.urls)),
 
+   # login
+   path('login/', LoginAPIView.as_view()),
+   path('register/', Registerview.as_view()),
+
+   # branchs
    path('branchs/', BranchViewSet.as_view({'get': 'list','post':'create'})),
    path('branch/<int:id>',BranchViewSet.as_view({'get': 'retrieve', 'delete': 'destroy'})),
-   path('teachers/', TeacherViewSet.as_view({'get': 'list','post':'create'})),
-   path('teacher/<int:id>',TeacherViewSet.as_view({'get': 'retrieve', 'delete': 'destroy'})),
+
+   # users
    path('user-admin/<int:id>/', UseradminViewSet.as_view()),
    path('user-admins/', Useradminview.as_view(), ),
+
+   # groups CRUD
    path('groups/', Groupviewset.as_view({'get': 'list','post':'create'})),
    path('groups/<int:id>',Groupviewset.as_view({'get': 'retrieve', 'delete': 'destroy'})),
 
-    path('teachers/<int:teacher_id>/groups/', TeacherGroupsListAPIView.as_view()),
+   # teachers
+   path('teachers/<int:teacher_id>/groups/', TeacherGroupsListAPIView.as_view()),
+   path('teachers/', TeacherViewSet.as_view({'get': 'list', 'post': 'create'})),
+   path('teacher/<int:id>', TeacherViewSet.as_view({'get': 'retrieve', 'delete': 'destroy'})),
 
-   path('login/', LoginAPIView.as_view()),
-   path('register/', Registerview.as_view()),
+   # swaggers
    path('swagger.<format>/', schema_view.without_ui(cache_timeout=0), name='schema-json'),
    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
