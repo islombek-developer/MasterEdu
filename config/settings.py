@@ -14,6 +14,8 @@ from pathlib import Path
 from django.utils.translation import gettext_lazy as _
 import os
 from dotenv import load_dotenv
+load_dotenv()  
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -102,7 +104,6 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 
-load_dotenv()  
 
 DATABASES = {
     'default': {
