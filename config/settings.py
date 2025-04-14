@@ -62,10 +62,10 @@ INSTALLED_APPS = [
     'drf_spectacular',
 
     # custom apps
-    'apps.manager',
     'apps.teacher',
     'apps.student',
     'apps.users',
+    'apps.owner',
 ]
 
 MIDDLEWARE = [
