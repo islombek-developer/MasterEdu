@@ -61,7 +61,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
 
     # custom apps
-    'apps.awner',
+    'apps.owner',
     'apps.teacher',
     'apps.student',
     'apps.users',

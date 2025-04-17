@@ -183,6 +183,7 @@ class Attendance(models.Model):
 class StudentDebt(models.Model):
     student = models.OneToOneField(Student, on_delete=models.CASCADE, related_name="debt")
     total_debt = models.IntegerField(default=0) 
+    balans = models.IntegerField(default=0) 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -215,7 +216,16 @@ class DailyPayment(models.Model):
 
     def __str__(self):
         return f"{self.student.first_name} - {self.payment_date} - {self.paid_amount}"
-    
+
+class Additional_income(models.Model):
+    paid_amount = models.IntegerField()
+
+class All_income(models.Model):
+    dailyPayment = models.ForeignKey(DailyPayment,on_delete=models.CASCADE,related_name='all_income')
+    additional_income = models.ForeignKey(Additional_income,on_delete=models.CASCADE)
+
+
+
 class StudentPaymentHistory(models.Model):
     student = models.ForeignKey(Student,on_delete=models.CASCADE)
     payment = models.ForeignKey(DailyPayment,on_delete=models.CASCADE)
