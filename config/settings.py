@@ -65,6 +65,7 @@ INSTALLED_APPS = [
     'apps.teacher',
     'apps.student',
     'apps.users',
+    'apps.finance'
 ]
 
 MIDDLEWARE = [
@@ -76,6 +77,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'apps.owner.middleware.SubscriptionCheckMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'

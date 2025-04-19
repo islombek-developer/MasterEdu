@@ -4,8 +4,6 @@ from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from django.urls import path,include
 from rest_framework.routers import DefaultRouter
-from api.users.views.views import BranchViewSet,TeacherViewSet,UseradminViewSet,Useradminview,Groupviewset,TeacherGroupsListAPIView
-from .login import LoginAPIView,Registerview
 
 
 router = DefaultRouter()
@@ -27,27 +25,6 @@ schema_view = get_schema_view(
 urlpatterns = [
    
    path('',include(router.urls)),
-
-   # login
-   path('login/', LoginAPIView.as_view()),
-   path('register/', Registerview.as_view()),
-
-   # branchs
-   path('branchs/', BranchViewSet.as_view({'get': 'list','post':'create'})),
-   path('branch/<int:id>',BranchViewSet.as_view({'get': 'retrieve', 'delete': 'destroy'})),
-
-   # users
-   path('user-admin/<int:id>/', UseradminViewSet.as_view()),
-   path('user-admins/', Useradminview.as_view(), ),
-
-   # groups CRUD
-   path('groups/', Groupviewset.as_view({'get': 'list','post':'create'})),
-   path('groups/<int:id>',Groupviewset.as_view({'get': 'retrieve', 'delete': 'destroy'})),
-
-   # teachers
-   path('teachers/<int:teacher_id>/groups/', TeacherGroupsListAPIView.as_view()),
-   path('teachers/', TeacherViewSet.as_view({'get': 'list', 'post': 'create'})),
-   path('teacher/<int:id>', TeacherViewSet.as_view({'get': 'retrieve', 'delete': 'destroy'})),
 
    # swaggers
    path('swagger.<format>/', schema_view.without_ui(cache_timeout=0), name='schema-json'),
