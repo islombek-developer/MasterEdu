@@ -59,7 +59,7 @@ class Attendance(models.Model):
 class StudentProgress(models.Model):
     student_group = models.ForeignKey(StudentGroup, on_delete=models.CASCADE, related_name='progress_records')
     date = models.DateField(default=timezone.localdate)
-    grade = models.PositiveIntegerField(default=0)  # 0-100 oralig'ida ball
+    grade = models.PositiveIntegerField(default=0)  
     comments = models.TextField(blank=True, null=True)
     created_by = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name='recorded_progress')
     created_at = models.DateTimeField(auto_now_add=True)

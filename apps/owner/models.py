@@ -82,12 +82,12 @@ class SubscriptionPayment(models.Model):
 
 class BranchSettings(models.Model):
     branch = models.OneToOneField('users.Branch', on_delete=models.CASCADE, related_name='settings')
-    working_days = models.CharField(max_length=100, default="1,2,3,4,5,6")  # Kun raqamlari (1=Dushanba, 7=Yakshanba)
+    working_days = models.CharField(max_length=100, default="1,2,3,4,5,6")  
     working_start_time = models.TimeField(default='08:00:00')
     working_end_time = models.TimeField(default='20:00:00')
-    lesson_duration = models.IntegerField(default=90)  # daqiqada
-    break_duration = models.IntegerField(default=10)  # daqiqada
-    tax_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0)  # soliq foizi
+    lesson_duration = models.IntegerField(default=90) 
+    break_duration = models.IntegerField(default=10) 
+    tax_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0)  
     
     def __str__(self):
         return f"{self.branch.name} - Sozlamalar"
@@ -95,7 +95,7 @@ class BranchSettings(models.Model):
 class Role(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True, null=True)
-    permissions = models.JSONField(default=dict)  # permissionlar JSONda saqlanadi
+    permissions = models.JSONField(default=dict)  
     created_by = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name='created_roles')
     
     def __str__(self):

@@ -57,7 +57,8 @@ class User(AbstractUser):
     created_by = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='created_users')
     managed_by = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='managed_users')
     status = models.CharField(choices=Status.choices, max_length=15, default=Status.ACTIVE)
- 
+    telegram_chat_id = models.CharField(max_length=200, blank=True, null=True)  
+    
     def full_name(self):
         return f'{self.first_name} {self.last_name}'
     
@@ -120,8 +121,8 @@ class Notification(models.Model):
     title = models.CharField(max_length=255)
     message = models.TextField()
     is_read = models.BooleanField(default=False)
-    related_to = models.CharField(max_length=100, blank=True, null=True)  # Qaysi bo'limga tegishli ekanini ko'rsatish uchun
-    related_id = models.IntegerField(blank=True, null=True)  # Bog'liq obyekt ID si
+    related_to = models.CharField(max_length=100, blank=True, null=True)  
+    related_id = models.IntegerField(blank=True, null=True)  
     created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_notifications')
 
