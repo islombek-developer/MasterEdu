@@ -116,7 +116,7 @@ class BranchReport(models.Model):
     total_expense = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     total_profit = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     student_count = models.IntegerField(default=0)
-    attendance_rate = models.DecimalField(max_digits=5, decimal_places=2, default=0)  # foizda
+    attendance_rate = models.DecimalField(max_digits=5, decimal_places=2, default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name='created_reports')
     

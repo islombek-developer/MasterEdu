@@ -1,8 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from rest_framework_simplejwt.tokens import RefreshToken
-from apps.owner.models import BranchSubscription
 from django.utils import timezone
+
 
 class Status(models.TextChoices):
     ACTIVE = 'active', 'Active'
@@ -21,6 +21,7 @@ class Branch(models.Model):
         return self.name
     
     def has_active_subscription(self):
+        from apps.owner.models import BranchSubscription
         """O'quv markaz aktiv obunaga ega ekanligini tekshirish"""
         active_subscription = BranchSubscription.objects.filter(
                 branch=self,
