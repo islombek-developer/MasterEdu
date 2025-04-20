@@ -49,10 +49,15 @@ class StudentPayment(models.Model):
         
         # Qarzni qayta hisoblash
         from apps.student.models import StudentGroup
+        from django.utils import timezone
+        import calendar
+        from datetime import datetime
+        
         student_groups = StudentGroup.objects.filter(student=self.student_group.student, status='active')
         
         total_required = 0
         total_paid = 0
+        total_remaining = 0
         
         for sg in student_groups:
             # Har bir guruh uchun to'lovlar summasi
@@ -60,13 +65,78 @@ class StudentPayment(models.Model):
             paid = payments.aggregate(Sum('amount'))['amount__sum'] or 0
             total_paid += paid
             
-            # Har bir guruh uchun to'lanishi kerak bo'lgan summa (guruhning oylik narxidan kelib chiqib)
-            from django.utils import timezone
-            months_passed = (timezone.now().date() - sg.joined_date).days // 30 + 1
-            required = sg.group.price_per_month * months_passed
-            total_required += required
+            joined_date = sg.joined_date
+            today = timezone.now().date()
+            
+            from apps.student.models import Attendance
+            attended_lessons = Attendance.objects.filter(
+                student=sg.student,
+                group=sg.group,
+                date__gte=joined_date,
+                date__lte=today,
+                status='present'
+            ).count()
+            lessons_per_week = sg.group.lessons_per_week if hasattr(sg.group, 'lessons_per_week') else 3
+            lessons_per_month = lessons_per_week * 4  
+            price_per_lesson = sg.group.price_per_month / lessons_per_month
+            
+            current_month_start = datetime(today.year, today.month, 1).date()
+            days_in_month = calendar.monthrange(today.year, today.month)[1]
+            current_month_end = datetime(today.year, today.month, days_in_month).date()
+            
+            if joined_date.month == today.month and joined_date.year == today.year:
+                remaining_days = days_in_month - joined_date.day + 1
+                first_month_payment = (sg.group.price_per_month * remaining_days) / days_in_month
+                
+                expected_lessons = (lessons_per_month * remaining_days / days_in_month)
+                
+                lessons_remaining = expected_lessons - attended_lessons
+                remaining_payment = max(0, price_per_lesson * lessons_remaining)
+                
+                total_required += first_month_payment
+                total_remaining += remaining_payment
+                
+            else:
+                months_passed = (today.year - joined_date.year) * 12 + today.month - joined_date.month
+                
+                if joined_date.day > 1 and months_passed > 0:
+                    days_in_first_month = calendar.monthrange(joined_date.year, joined_date.month)[1]
+                    remaining_days = days_in_first_month - joined_date.day + 1
+                    first_month_payment = (sg.group.price_per_month * remaining_days) / days_in_first_month
+                    full_months_payment = sg.group.price_per_month * (months_passed - 1)
+                    
+                    current_month_attended = Attendance.objects.filter(
+                        student=sg.student,
+                        group=sg.group,
+                        date__gte=current_month_start,
+                        date__lte=today,
+                        status='present'
+                    ).count()
+                    
+                    remaining_lessons = lessons_per_month - current_month_attended
+                    current_month_remaining = max(0, price_per_lesson * remaining_lessons)
+                    
+                    total_required += first_month_payment + full_months_payment + sg.group.price_per_month
+                    total_remaining += current_month_remaining
+                else:
+                    required = sg.group.price_per_month * months_passed
+                    
+                    current_month_attended = Attendance.objects.filter(
+                        student=sg.student,
+                        group=sg.group,
+                        date__gte=current_month_start,
+                        date__lte=today,
+                        status='present'
+                    ).count()
+                    
+                    remaining_lessons = lessons_per_month - current_month_attended
+                    current_month_remaining = max(0, price_per_lesson * remaining_lessons)
+                    
+                    total_required += required
+                    total_remaining += current_month_remaining
         
         debt.total_debt = max(0, total_required - total_paid)
+        debt.current_month_remaining = total_remaining
         debt.balance = max(0, total_paid - total_required)
         debt.save()
 
@@ -102,7 +172,7 @@ class Expense(models.Model):
 class Salary(models.Model):
     teacher = models.ForeignKey('teacher.Teacher', on_delete=models.CASCADE, related_name='salaries')
     amount = models.DecimalField(max_digits=10, decimal_places=2)
-    month = models.DateField()  # Oy va yil uchun
+    month = models.DateField()  
     paid_date = models.DateField(default=date.today)
     payment_type = models.CharField(max_length=20, choices=PaymentType.choices, default=PaymentType.CASH)
     paid_by = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name='paid_salaries')
