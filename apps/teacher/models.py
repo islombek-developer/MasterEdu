@@ -64,6 +64,10 @@ class Group(models.Model):
     def __str__(self):
         return f"{self.title} - {self.teacher.get_full_name()}"
 
+    def is_full(self):
+        return self.student_set.count() >= self.max_students
+
+
 class Schedule(models.Model):
     DAY_CHOICES = [
         ('1', 'Monday'), 
@@ -80,7 +84,7 @@ class Schedule(models.Model):
     day_of_week = models.CharField(max_length=10, choices=DAY_CHOICES)
     start_time = models.TimeField()
     end_time = models.TimeField()
-    room = models.CharField(max_length=50, blank=True, null=True)  # Xona/kabinet raqami
+    room = models.CharField(max_length=50, blank=True, null=True)  
 
     class Meta:
         unique_together = ['group', 'day_of_week', 'start_time']
