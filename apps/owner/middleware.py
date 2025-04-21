@@ -10,7 +10,7 @@ class SubscriptionCheckMiddleware:
     def __call__(self, request):
         # Login va to'lovga oid sahifalar blokirovka qilinmasligi kerak
         exempt_paths = [
-            reverse('login'),
+            # reverse('login'),
             reverse('admin:index'),
             '/subscription/payment/',
             '/subscription/plans/',
