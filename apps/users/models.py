@@ -16,6 +16,7 @@ class Branch(models.Model):
     status = models.CharField(choices=Status.choices, max_length=15, default=Status.ACTIVE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    logo = models.ImageField(upload_to='media')
 
     def __str__(self):
         return self.name
