@@ -1,16 +1,15 @@
-# quiz_app/ai_utils.py
+\
 import os
 import json
 import random
 # pip install openai
 from openai import OpenAI
-# pip install python-dotenv # Agar .env ishlatsangiz
-# from dotenv import load_dotenv
-# load_dotenv()
+# pip install python-dotenv 
+from dotenv import load_dotenv
+load_dotenv()
 
 client = None
-api_key = "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"
-
+api_key = os.getenv("OPENAI_API_KEY")
 if api_key:
     client = OpenAI(api_key=api_key)
 else:
@@ -63,13 +62,13 @@ def generate_questions_via_ai(topic, difficulty, count, question_type='vocabular
 
     try:
         response = client.chat.completions.create(
-            model="gpt-3.5-turbo", # Yoki "gpt-4o", "gpt-4"
+            model="gpt-3.5-turbo", 
             messages=[
                 {"role": "system", "content": "You are an expert English language teacher assistant creating quiz questions in JSON format."},
                 {"role": "user", "content": prompt}
             ],
             temperature=0.7,
-             response_format={ "type": "json_object" } # JSON formatni talab qilish (agar model qo'llasa)
+             response_format={ "type": "json_object" } 
         )
 
         ai_response_content = response.choices[0].message.content
