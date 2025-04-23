@@ -1,5 +1,47 @@
 from django.contrib import admin
-from .models import Teacher, Sciences, Group, Schedule, LessonMaterial
+from .models import Teacher, Sciences, Group, Schedule, LessonMaterial,Category, Quiz, Question, Answer, QuizAttempt, UserAnswer
+
+@admin.register(Category)
+class CategoryAdmin(admin.ModelAdmin):
+    list_display = ('name', 'description')
+    search_fields = ('name',)
+
+
+@admin.register(Quiz)
+class QuizAdmin(admin.ModelAdmin):
+    list_display = ('title', 'teacher', 'group', 'category', 'difficulty', 'time_limit_minutes', 'passing_score', 'is_active')
+    list_filter = ('category', 'difficulty', 'is_active')
+    search_fields = ('title', 'teacher__user__username', 'group__name')
+    ordering = ('-created_at',)
+
+
+@admin.register(Question)
+class QuestionAdmin(admin.ModelAdmin):
+    list_display = ('text', 'quiz', 'points', 'created_at')
+    search_fields = ('text', 'quiz__title')
+    list_filter = ('quiz',)
+
+
+@admin.register(Answer)
+class AnswerAdmin(admin.ModelAdmin):
+    list_display = ('text', 'question', 'is_correct')
+    list_filter = ('is_correct',)
+    search_fields = ('text', 'question__text')
+
+
+@admin.register(QuizAttempt)
+class QuizAttemptAdmin(admin.ModelAdmin):
+    list_display = ('student', 'quiz', 'score', 'started_at', 'completed_at', 'is_completed', 'passed')
+    list_filter = ('quiz', 'is_completed')
+    search_fields = ('student__user__username', 'quiz__title')
+
+
+@admin.register(UserAnswer)
+class UserAnswerAdmin(admin.ModelAdmin):
+    list_display = ('attempt', 'question', 'selected_answer', 'is_correct')
+    search_fields = ('attempt__student__user__username', 'question__text', 'selected_answer__text')
+    list_filter = ('is_correct',)
+
 
 
 @admin.register(Teacher)
