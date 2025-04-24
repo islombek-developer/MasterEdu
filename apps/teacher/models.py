@@ -127,15 +127,13 @@ class Quiz(models.Model):
     
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
-    group = models.ForeignKey(Group, on_delete=models.CASCADE, related_name="quizzes")
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name="quizzes")
-    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE)
+    teacher = models.ForeignKey('Teacher', on_delete=models.CASCADE)
     difficulty = models.CharField(max_length=10, choices=DIFFICULTY_CHOICES, default='medium')
     time_limit_minutes = models.IntegerField(default=30)
     passing_score = models.PositiveIntegerField(default=70)
     is_active = models.BooleanField(default=True)
-    start_time = models.DateTimeField(null=True, blank=True, help_text="Testni boshlash vaqti")
-    end_time = models.DateTimeField(null=True, blank=True, help_text="Testni yakunlash vaqti")
+    max_attempts = models.PositiveIntegerField(default=1, help_text="Maximum number of times a student can attempt this quiz")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     topic = models.CharField(
@@ -154,7 +152,6 @@ class Quiz(models.Model):
 
 
 class Question(models.Model):
-    
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name="questions")
     text = models.TextField()
     points = models.PositiveIntegerField(default=1)
@@ -169,9 +166,6 @@ class Question(models.Model):
         verbose_name = "Savol"
         verbose_name_plural = "Savollar"
         ordering = ['quiz', 'id']
-    
-    def question_count(self):
-        return self.questions.count()
 
 
 class Answer(models.Model):
@@ -187,11 +181,28 @@ class Answer(models.Model):
         verbose_name_plural = "Javoblar"
 
 
+class QuizAssignment(models.Model):
+    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name="assignments")
+    group = models.ForeignKey('Group', on_delete=models.CASCADE, related_name="quiz_assignments")
+    start_time = models.DateTimeField(help_text="Testni boshlash vaqti")
+    end_time = models.DateTimeField(help_text="Testni yakunlash vaqti")
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"{self.quiz.title} for {self.group.title} ({self.start_time.strftime('%Y-%m-%d')})"
+    
+    class Meta:
+        verbose_name = "Test tayinlash"
+        verbose_name_plural = "Test tayinlashlar"
+
+
 class QuizAttempt(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name="attempts")
+    quiz_assignment = models.ForeignKey(QuizAssignment, on_delete=models.CASCADE, related_name="attempts", null=True)
     score = models.FloatField(null=True, blank=True)
-    started_at = models.DateTimeField(null=True,blank=True)
+    started_at = models.DateTimeField(auto_now_add=True)
     completed_at = models.DateTimeField(null=True, blank=True)
     is_completed = models.BooleanField(default=False)
     
@@ -214,21 +225,25 @@ class QuizAttempt(models.Model):
         verbose_name = "Test urinishi"
         verbose_name_plural = "Test urinishlari"
 
-    def __str__(self):
-        return f"{self.student.username} - {self.quiz.title} ({'Completed' if self.completed else 'In Progress'})"
-
     def duration(self):
-        if self.end_time:
-            return self.end_time - self.start_time
-        elif self.completed: # Agar end_time yo'q lekin tugagan bo'lsa (masalan vaqt tugashi bilan)
-             return self.quiz.time_limit_minutes * 60 # Taxminiy davomiylik (sekundda)
+        if self.completed_at:
+            return self.completed_at - self.started_at
+        elif self.is_completed: 
+            return self.quiz.time_limit_minutes * 60
         else:
-            return timezone.now() - self.start_time # Hozirgacha o'tgan vaqt
+            return timezone.now() - self.started_at
 
     def score_percentage(self):
-        if self.total_questions > 0:
-            return round((self.correct_answers_count / self.total_questions) * 100)
+        total_questions = self.user_answers.count()
+        if total_questions > 0:
+            correct_answers = self.user_answers.filter(is_correct=True).count()
+            return round((correct_answers / total_questions) * 100)
         return 0
+    
+    @classmethod
+    def get_attempts_count(cls, student, quiz):
+        """Return the number of attempts a student has made for a specific quiz"""
+        return cls.objects.filter(student=student, quiz=quiz).count()
 
 
 class UserAnswer(models.Model):
