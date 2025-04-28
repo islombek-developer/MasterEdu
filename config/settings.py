@@ -164,6 +164,60 @@ Loging ={
     },
 }
 
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Service API',
+    'DESCRIPTION': '',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'SCHEMA_PATH_PREFIX_INSERT': '/api',
+    'ENUM_NAME_OVERRIDES': {},
+    'SERVE_URLCONF': 'api.urls',
+    'COMPONENT_SPLIT_REQUEST': True,
+}
+
+SPECTACULAR_SETTINGS_ADMIN = {
+    'TITLE': 'Admin API',
+    'DESCRIPTION': 'Admin panel uchun API.',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'SCHEMA_PATH_PREFIX_INSERT': '/api/admin',
+    'ENUM_NAME_OVERRIDES': {},
+    'SERVE_URLCONF': 'api.admin.urls',
+    'DEFAULT_GENERATOR_CLASS': 'config.swaggers.custom_generator.CustomSchemaGenerator',
+}
+
+SPECTACULAR_SETTINGS_TEACHER = {
+    'TITLE': 'Teacher API',
+    'DESCRIPTION': 'Teacher uchun API.',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'SCHEMA_PATH_PREFIX_INSERT': '/api/teacher',
+    'ENUM_NAME_OVERRIDES': {},
+    'SERVE_URLCONF': 'api.teacher.urls',
+    'DEFAULT_GENERATOR_CLASS': 'config.swaggers.custom_generator.CustomSchemaGenerator',
+}
+
+SPECTACULAR_SETTINGS_STUDENT = {
+    'TITLE': 'Student API',
+    'DESCRIPTION': 'Student uchun API.',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'SCHEMA_PATH_PREFIX_INSERT': '/api/student',
+    'ENUM_NAME_OVERRIDES': {},
+    'SERVE_URLCONF': 'api.student.urls',
+    'DEFAULT_GENERATOR_CLASS': 'config.swaggers.custom_generator.CustomSchemaGenerator',
+}
+
+SPECTACULAR_SETTINGS_PARENT = {
+    'TITLE': 'Parent API',
+    'DESCRIPTION': 'Parent uchun API.',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'SCHEMA_PATH_PREFIX_INSERT': '/api/parent',
+    'ENUM_NAME_OVERRIDES': {},
+    'SERVE_URLCONF': 'api.parent.urls',
+    'DEFAULT_GENERATOR_CLASS': 'config.swaggers.custom_generator.CustomSchemaGenerator',
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
@@ -214,8 +268,13 @@ REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
  
 }
+SPECTACULAR_SETTINGS = {
+    'SCHEMA_GENERATOR_CLASS': 'your_project.my_custom_generator.CustomSchemaGenerator',
+}
+
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+
     'PAGE_SIZE': 10
 }
 JAZZMIN_SETTINGS = {
