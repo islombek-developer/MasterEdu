@@ -50,13 +50,11 @@ LOGGING = {
     },
 }
 
-# Additional development apps
 INSTALLED_APPS += [
-    'django_extensions',  # Uncomment if installed
-    # 'debug_toolbar',    # Uncomment if installed
+    'django_extensions'
+    # 'debug_toolbar',    
 ]
 
-# Debug Toolbar settings (if installed)
 # if 'debug_toolbar' in INSTALLED_APPS:
 #     MIDDLEWARE += ['debug_toolbar.middleware.DebugToolbarMiddleware']
 #     INTERNAL_IPS = ['127.0.0.1']

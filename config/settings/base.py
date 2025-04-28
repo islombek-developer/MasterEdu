@@ -176,16 +176,7 @@ REST_FRAMEWORK = {
 #     'DEFAULT_GENERATOR_CLASS': 'config.swaggers.custom_generator.CustomSchemaGenerator',
 # }
 
-# SPECTACULAR_SETTINGS_PARENT = {
-#     'TITLE': 'Parent API',
-#     'DESCRIPTION': 'Parent uchun API.',
-#     'VERSION': '1.0.0',
-#     'SERVE_INCLUDE_SCHEMA': False,
-#     'SCHEMA_PATH_PREFIX_INSERT': '/api/parent',
-#     'ENUM_NAME_OVERRIDES': {},
-#     'SERVE_URLCONF': 'api.parent.urls',
-#     'DEFAULT_GENERATOR_CLASS': 'config.swaggers.custom_generator.CustomSchemaGenerator',
-# }
+
 
 # Jazzmin settings
 JAZZMIN_SETTINGS = {

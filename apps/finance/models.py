@@ -146,7 +146,7 @@ class StudentPayment(models.Model):
 class ExpenseCategory(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True, null=True)
-    is_salary = models.BooleanField(default=False)  # Ish haqi toifasi ekanligini belgilash
+    is_salary = models.BooleanField(default=False)  
     
     class Meta:
         verbose_name_plural = "Expense Categories"
