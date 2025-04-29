@@ -117,9 +117,6 @@ DATABASES = {
     }
 }
 
-REST_FRAMEWORK = {
-    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',  # To'g'ri bo'lishi kerak
-}
 
 
 # Password validation
@@ -176,9 +173,9 @@ USE_TZ = True
 AUTH_USER_MODEL = 'users.User'
 STATIC_URL = 'static/'
 
-# STATICFILES_DIRS=[
-#     BASE_DIR / 'static',
-# ]
+STATICFILES_DIRS=[
+    BASE_DIR / 'static',
+]
 
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
@@ -187,8 +184,9 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",  # Agar React app localhostda ishlayotgan bo'lsa
-    "https://yourfrontenddomain.com",  # Production frontend domening
+    "http://localhost:3000",  
+    "https://incoder.uz",  
+
 ]
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_METHODS = (
