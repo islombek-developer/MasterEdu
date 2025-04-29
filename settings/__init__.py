@@ -16,13 +16,13 @@
 # else:
 #     from .production import *
 
-import os
-from dotenv import load_dotenv
-load_dotenv()
+# import os
+# from dotenv import load_dotenv
+# load_dotenv()
 
-environment = os.getenv('DJANGO_ENVIRONMENT', 'development')
+# environment = os.getenv('DJANGO_ENVIRONMENT', 'development')
 
-if environment == 'production':
-    from .production import *
-else:
-    from .development import *
+# if environment == 'production':
+#     from .production import *
+# else:
+#     from .development import *
