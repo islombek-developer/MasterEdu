@@ -121,26 +121,26 @@ class Category(models.Model):
 class Quiz(models.Model):
     DIFFICULTY_CHOICES = [
         ('easy', 'Oson'),
-        ('medium', 'O\'rta'),
+        ('medium', 'Orta'),
         ('hard', 'Qiyin'),
     ]
     
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name="quizzes")
-    teacher = models.ForeignKey('Teacher', on_delete=models.CASCADE)
+    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE)
     difficulty = models.CharField(max_length=10, choices=DIFFICULTY_CHOICES, default='medium')
     time_limit_minutes = models.IntegerField(default=30)
     passing_score = models.PositiveIntegerField(default=70)
     is_active = models.BooleanField(default=True)
-    max_attempts = models.PositiveIntegerField(default=1, help_text="Maximum number of times a student can attempt this quiz")
+    max_attempts = models.PositiveIntegerField(default=1)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     topic = models.CharField(
         max_length=255,
         blank=True,
         null=True,
-        help_text="Test uchun asosiy mavzu (AI generatsiyasi uchun muhim)"
+        help_text="Test uchun asosiy mavzu AI generatsiyasi "
     )
     
     def __str__(self):
@@ -242,7 +242,6 @@ class QuizAttempt(models.Model):
     
     @classmethod
     def get_attempts_count(cls, student, quiz):
-        """Return the number of attempts a student has made for a specific quiz"""
         return cls.objects.filter(student=student, quiz=quiz).count()
 
 

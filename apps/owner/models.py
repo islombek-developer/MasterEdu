@@ -4,12 +4,11 @@ from django.utils import timezone
 import datetime
 
 class SubscriptionPlan(models.Model):
-    """O'quv markazlar uchun obuna rejasi"""
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True, null=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     duration_days = models.IntegerField(help_text="Obuna davomiyligi kunlarda")
-    features = models.JSONField(default=dict, help_text="Reja bo'yicha mavjud funksiyalar")
+    features = models.JSONField(default=dict, help_text="Reja boyicha mavjud funksiyalar")
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -19,10 +18,9 @@ class SubscriptionPlan(models.Model):
         return f"{self.name} - {self.price}"
 
 class BranchSubscription(models.Model):
-    """O'quv markaz obunasi"""
     PAYMENT_STATUS = (
         ('pending', 'Kutilmoqda'),
-        ('paid', 'To\'langan'),
+        ('paid', 'Tolangan'),
         ('cancelled', 'Bekor qilingan'),
         ('expired', 'Muddati tugagan'),
     )
@@ -62,12 +60,10 @@ class BranchSubscription(models.Model):
         self.save()
         
     def extend(self, days):
-        """Obunani belgilangan kun soniga uzaytirish"""
         self.end_date = self.end_date + datetime.timedelta(days=days)
         self.save()
 
 class SubscriptionPayment(models.Model):
-    """Obuna to'lovlari"""
     subscription = models.ForeignKey(BranchSubscription, on_delete=models.CASCADE, related_name='payments')
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     payment_date = models.DateTimeField(default=timezone.now)
