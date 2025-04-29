@@ -12,7 +12,7 @@ class PaymentPeriod(models.TextChoices):
 class PaymentType(models.TextChoices):
     CASH = 'cash', 'Naqd'
     CARD = 'card', 'Karta'
-    TRANSFER = 'transfer', 'O\'tkazma'
+    TRANSFER = 'transfer', 'Otkazma'
     OTHER = 'other', 'Boshqa'
 
 class StudentDebt(models.Model):
@@ -24,7 +24,7 @@ class StudentDebt(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.student.get_full_name()} - {self.total_debt} so'm"
+        return f"{self.student.get_full_name()} - {self.total_debt} som"
 
 class StudentPayment(models.Model):
     student_group = models.ForeignKey('student.StudentGroup', on_delete=models.CASCADE, related_name='payments')
@@ -60,7 +60,6 @@ class StudentPayment(models.Model):
         total_remaining = 0
         
         for sg in student_groups:
-            # Har bir guruh uchun to'lovlar summasi
             payments = StudentPayment.objects.filter(student_group=sg)
             paid = payments.aggregate(Sum('amount'))['amount__sum'] or 0
             total_paid += paid
@@ -148,8 +147,6 @@ class ExpenseCategory(models.Model):
     description = models.TextField(blank=True, null=True)
     is_salary = models.BooleanField(default=False)  
     
-    class Meta:
-        verbose_name_plural = "Expense Categories"
     
     def __str__(self):
         return self.name
@@ -178,8 +175,6 @@ class Salary(models.Model):
     paid_by = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name='paid_salaries')
     branch = models.ForeignKey('users.Branch', on_delete=models.CASCADE, related_name='teacher_salaries')
     note = models.TextField(blank=True, null=True)
-    
-    # Avtomatik xarajat yaratish uchun
     expense = models.OneToOneField(Expense, on_delete=models.SET_NULL, null=True, blank=True, related_name='salary')
 
     class Meta:
@@ -189,10 +184,9 @@ class Salary(models.Model):
         is_new = self.pk is None
         super().save(*args, **kwargs)
         
-        # Ish haqi to'langanda, xarajatlar jadvaliga ham qo'shish
         if is_new and not self.expense:
             salary_category, _ = ExpenseCategory.objects.get_or_create(
-                name="O'qituvchi maoshi",
+                name="oqituvchi maoshi",
                 defaults={'is_salary': True}
             )
             
@@ -239,22 +233,17 @@ class FinancialReport(models.Model):
     period = models.CharField(max_length=20, choices=REPORT_PERIOD)
     start_date = models.DateField()
     end_date = models.DateField()
-    
     student_payments = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     additional_incomes = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     total_income = models.DecimalField(max_digits=12, decimal_places=2, default=0)
-    
     salary_expenses = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     other_expenses = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     total_expenses = models.DecimalField(max_digits=12, decimal_places=2, default=0)
-    
     net_profit = models.DecimalField(max_digits=12, decimal_places=2, default=0)
-    
     created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name='created_financial_reports')
     
     def calculate_report(self):
-        # O'quvchilar to'lovlari
         from apps.finance.models import StudentPayment
         student_payments = StudentPayment.objects.filter(
             branch=self.branch,
@@ -262,14 +251,12 @@ class FinancialReport(models.Model):
             payment_date__lte=self.end_date
         ).aggregate(Sum('amount'))['amount__sum'] or 0
         
-        # Qo'shimcha daromadlar
         additional = AdditionalIncome.objects.filter(
             branch=self.branch,
             date__gte=self.start_date,
             date__lte=self.end_date
         ).aggregate(Sum('amount'))['amount__sum'] or 0
         
-        # Ish haqi xarajatlari
         salaries = Expense.objects.filter(
             branch=self.branch,
             date__gte=self.start_date,
@@ -277,7 +264,6 @@ class FinancialReport(models.Model):
             category__is_salary=True
         ).aggregate(Sum('amount'))['amount__sum'] or 0
         
-        # Boshqa xarajatlar
         other_exp = Expense.objects.filter(
             branch=self.branch,
             date__gte=self.start_date,
@@ -285,7 +271,6 @@ class FinancialReport(models.Model):
             category__is_salary=False
         ).aggregate(Sum('amount'))['amount__sum'] or 0
         
-        # Natijalarni saqlash
         self.student_payments = student_payments
         self.additional_incomes = additional
         self.total_income = student_payments + additional
