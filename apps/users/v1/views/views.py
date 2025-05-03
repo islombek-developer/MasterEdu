@@ -34,7 +34,6 @@ class BranchViewSet(viewsets.ModelViewSet):
     serializer_class = BranchSerializer
     permission_classes = [IsOwnerOrAdmin]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ['status', 'is_active']
     search_fields = ['name', 'address', 'phone_number', 'email']
     ordering_fields = ['name', 'created_at', 'updated_at']
     ordering = ['name']
@@ -96,11 +95,11 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ['user_role', 'status', 'is_active', 'branch']
+    filterset_fields = ['user_role', 'status', 'branch']  
     search_fields = ['username', 'first_name', 'last_name', 'phone_number', 'email', 'address']
     ordering_fields = ['username', 'date_joined', 'first_name', 'last_name']
     ordering = ['-date_joined']
-    
+
     def get_queryset(self):
         user = self.request.user
         if not user.is_authenticated:
@@ -137,9 +136,9 @@ class UserViewSet(viewsets.ModelViewSet):
     
     @action(detail=False, methods=['get'])
     def me(self, request):
-        """Get current user's profile"""
-        serializer = self.get_serializer(request.user)
+        serializer = self.get_serializer(request.user) 
         return Response(serializer.data)
+
     
     @action(detail=False, methods=['put', 'patch'])
     def update_me(self, request):
@@ -222,12 +221,6 @@ class UserViewSet(viewsets.ModelViewSet):
         user.save()
         return Response({'status': 'user deactivated'})
 
-    serializer_class = NotificationSerializer
-    permission_classes = [permissions.IsAuthenticated]
-    filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
-    filterset_fields = ['is_read', 'related_to', 'notification_type']
-    ordering_fields = ['created_at', 'is_read']
-    ordering = ['-created_at']
     
     def get_queryset(self):
         return Notification.objects.filter(user=self.request.user)
@@ -260,15 +253,15 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response({"unread_count": count})
 
 class NotificationViewSet(viewsets.ModelViewSet):
-    queryset = Notification.objects.all()
     serializer_class = NotificationSerializer
     permission_classes = [permissions.IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
-    filterset_fields = ['is_read', 'related_to']
-    ordering_fields = ['created_at']
+    filterset_fields = ['is_read', 'related_to', 'notification_type']
+    ordering_fields = ['created_at', 'is_read']
+    ordering = ['-created_at']
     
     def get_queryset(self):
-        return Notification.objects.filter(user=self.request.user).order_by('-created_at')
+        return Notification.objects.filter(user=self.request.user)
     
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user)
