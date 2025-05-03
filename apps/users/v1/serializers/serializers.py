@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from apps.users.models import Branch, User, Notification
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError as DjangoValidationError
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
@@ -98,3 +100,44 @@ class NotificationSerializer(serializers.ModelSerializer):
     
     def get_created_by_name(self, obj):
         return f"{obj.created_by.first_name} {obj.created_by.last_name}"
+    
+
+class ChangePasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField(required=False, write_only=True)
+    new_password = serializers.CharField(required=True, write_only=True)
+    confirm_password = serializers.CharField(required=True, write_only=True)
+
+    def validate(self, attrs):
+        user = self.context['request'].user
+        new_password = attrs.get('new_password')
+        confirm_password = attrs.get('confirm_password')
+
+  
+        if new_password != confirm_password:
+            raise serializers.ValidationError(
+                {"new_password": "Password fields didn't match."}
+            )
+
+        if 'user' in self.context and self.context['user'] != user:
+            return attrs
+
+        old_password = attrs.get('old_password')
+        if not user.check_password(old_password):
+            raise serializers.ValidationError(
+                {"old_password": "Old password is not correct"}
+            )
+
+        return attrs
+
+    def validate_new_password(self, value):
+        try:
+            validate_password(value)
+        except DjangoValidationError as e:
+            raise serializers.ValidationError(list(e.messages))
+        return value
+
+    def save(self, **kwargs):
+        user = self.context.get('user', self.context['request'].user)
+        user.set_password(self.validated_data['new_password'])
+        user.save()
+        return user
