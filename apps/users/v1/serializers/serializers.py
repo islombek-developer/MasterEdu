@@ -22,13 +22,26 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 
 class BranchSerializer(serializers.ModelSerializer):
     has_subscription = serializers.SerializerMethodField()
-
+    
     class Meta:
         model = Branch
         fields = '__all__'
+        extra_kwargs = {
+            'created_by': {'read_only': True}  
+        }
 
     def get_has_subscription(self, obj):
         return obj.has_active_subscription()
+
+    def create(self, validated_data):
+        validated_data.pop('created_by', None)
+        branch = Branch.objects.create(**validated_data)
+        
+        if self.context.get('request'):
+            branch.created_by = self.context['request'].user
+            branch.save()
+        
+        return branch
 
 class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=False)
