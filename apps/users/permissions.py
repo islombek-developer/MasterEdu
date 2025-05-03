@@ -145,3 +145,23 @@ class HasActiveSubscription(permissions.BasePermission):
             return any(branch.has_active_subscription() for branch in branches)
         
         return True
+    
+class IsOwnerOrAdmin(permissions.BasePermission):
+
+    def has_permission(self, request, view):
+        if request.method in permissions.SAFE_METHODS:
+            return request.user.is_authenticated
+        
+ 
+        return request.user.is_authenticated and request.user.user_role in ['owner', 'admin']
+    
+    def has_object_permission(self, request, view, obj):
+        if request.user.user_role == 'owner':
+            return True
+        elif request.user.user_role == 'admin':
+            if isinstance(obj, Branch):
+                return request.user.branch.filter(id=obj.id).exists()
+            elif isinstance(obj, User):
+                return request.user.can_manage_user(obj)
+            return True
+        return False

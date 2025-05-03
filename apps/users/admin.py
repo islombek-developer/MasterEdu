@@ -36,3 +36,4 @@ class NotificationAdmin(admin.ModelAdmin):
     list_display = ('title', 'user', 'is_read', 'created_at', 'created_by')
     search_fields = ('title', 'message', 'user__username', 'created_by__username')
     list_filter = ('is_read', 'created_at')
+
