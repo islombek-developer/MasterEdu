@@ -107,22 +107,18 @@ class GroupViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = Group.objects.all()
         
-        # Filter by teacher if specified
         teacher_id = self.request.query_params.get('teacher_id', None)
         if teacher_id:
             queryset = queryset.filter(teacher_id=teacher_id)
-        
-        # Filter by science if specified
+       
         science_id = self.request.query_params.get('science_id', None)
         if science_id:
             queryset = queryset.filter(science_id=science_id)
         
-        # Filter by branch if specified
         branch_id = self.request.query_params.get('branch_id', None)
         if branch_id:
             queryset = queryset.filter(branch_id=branch_id)
         
-        # Filter by status if specified
         status_filter = self.request.query_params.get('status', None)
         if status_filter:
             queryset = queryset.filter(status=status_filter)
@@ -175,17 +171,16 @@ class ScheduleViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = Schedule.objects.all()
         
-        # Filter by group if specified
         group_id = self.request.query_params.get('group_id', None)
         if group_id:
             queryset = queryset.filter(group_id=group_id)
         
-        # Filter by teacher if specified
+        
         teacher_id = self.request.query_params.get('teacher_id', None)
         if teacher_id:
             queryset = queryset.filter(teacher_id=teacher_id)
         
-        # Filter by day if specified
+  
         day = self.request.query_params.get('day', None)
         if day:
             queryset = queryset.filter(day_of_week=day)
@@ -210,7 +205,6 @@ class LessonMaterialViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = LessonMaterial.objects.all()
         
-        # Filter by group if specified
         group_id = self.request.query_params.get('group_id', None)
         if group_id:
             queryset = queryset.filter(group_id=group_id)
@@ -259,27 +253,23 @@ class QuizViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = Quiz.objects.all()
         
-        # If user is a teacher, only show their quizzes
         if self.request.user.user_role == 'teacher':
             teacher = get_object_or_404(Teacher, user=self.request.user)
             queryset = queryset.filter(teacher=teacher)
         
-        # Filter by teacher if specified
+        
         teacher_id = self.request.query_params.get('teacher_id', None)
         if teacher_id:
             queryset = queryset.filter(teacher_id=teacher_id)
         
-        # Filter by category if specified
         category_id = self.request.query_params.get('category_id', None)
         if category_id:
             queryset = queryset.filter(category_id=category_id)
         
-        # Filter by difficulty if specified
         difficulty = self.request.query_params.get('difficulty', None)
         if difficulty:
             queryset = queryset.filter(difficulty=difficulty)
         
-        # Filter by active status if specified
         is_active = self.request.query_params.get('is_active', None)
         if is_active is not None:
             is_active = is_active.lower() == 'true'
@@ -329,7 +319,6 @@ class QuestionViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = Question.objects.all()
         
-        # Filter by quiz if specified
         quiz_id = self.request.query_params.get('quiz_id', None)
         if quiz_id:
             queryset = queryset.filter(quiz_id=quiz_id)
@@ -353,23 +342,19 @@ class QuizAssignmentViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = QuizAssignment.objects.all()
         
-        # Filter by quiz if specified
         quiz_id = self.request.query_params.get('quiz_id', None)
         if quiz_id:
             queryset = queryset.filter(quiz_id=quiz_id)
         
-        # Filter by group if specified
         group_id = self.request.query_params.get('group_id', None)
         if group_id:
             queryset = queryset.filter(group_id=group_id)
         
-        # Filter by active status if specified
         is_active = self.request.query_params.get('is_active', None)
         if is_active is not None:
             is_active = is_active.lower() == 'true'
             queryset = queryset.filter(is_active=is_active)
         
-        # Filter by date range if specified
         now = timezone.now()
         active_now = self.request.query_params.get('active_now', None)
         if active_now is not None and active_now.lower() == 'true':
@@ -451,7 +436,6 @@ class QuizAttemptViewSet(viewsets.ModelViewSet):
         quiz = get_object_or_404(Quiz, id=quiz_id)
         assignment_id = request.data.get('quiz_assignment')
         
-        # Check attempts limit
         attempts_count = QuizAttempt.get_attempts_count(student, quiz)
         if attempts_count >= quiz.max_attempts:
             return Response(
@@ -459,7 +443,6 @@ class QuizAttemptViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        # If assignment provided, validate it's still active
         if assignment_id:
             assignment = get_object_or_404(QuizAssignment, id=assignment_id)
             now = timezone.now()
@@ -469,7 +452,6 @@ class QuizAttemptViewSet(viewsets.ModelViewSet):
                     status=status.HTTP_400_BAD_REQUEST
                 )
         
-        # Create new attempt
         attempt = QuizAttempt.objects.create(
             student=student,
             quiz=quiz,
@@ -484,21 +466,18 @@ class QuizAttemptViewSet(viewsets.ModelViewSet):
         attempt = self.get_object()
         student = get_object_or_404(Student, user=request.user)
         
-        # Verify this attempt belongs to the student
         if attempt.student != student:
             return Response(
                 {"error": "You do not have permission to submit answers for this attempt"},
                 status=status.HTTP_403_FORBIDDEN
             )
         
-        # Verify attempt is not already completed
         if attempt.is_completed:
             return Response(
                 {"error": "This quiz attempt has already been completed"},
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        # Process answers
         answers_data = request.data.get('answers', [])
         correct_count = 0
         total_points = 0
@@ -509,18 +488,15 @@ class QuizAttemptViewSet(viewsets.ModelViewSet):
             selected_answer_id = answer_data.get('selected_answer')
             written_answer = answer_data.get('written_answer')
             
-            # Skip if no answer was provided
             if not selected_answer_id and not written_answer:
                 continue
             
-            # Get the selected answer if provided
             selected_answer = None
             is_correct = False
             if selected_answer_id:
                 selected_answer = get_object_or_404(Answer, id=selected_answer_id, question=question)
                 is_correct = selected_answer.is_correct
             
-            # Create or update user answer
             user_answer, created = UserAnswer.objects.update_or_create(
                 attempt=attempt,
                 question=question,
@@ -535,14 +511,12 @@ class QuizAttemptViewSet(viewsets.ModelViewSet):
                 correct_count += 1
                 total_points += question.points
         
-        # Calculate score
         total_questions = attempt.quiz.questions.count()
         if total_questions > 0:
             score = (correct_count / total_questions) * 100
         else:
             score = 0
         
-        # Complete the attempt
         attempt.score = score
         attempt.completed_at = timezone.now()
         attempt.is_completed = True
@@ -556,7 +530,6 @@ class QuizAttemptViewSet(viewsets.ModelViewSet):
         attempt = self.get_object()
         student = get_object_or_404(Student, user=request.user)
         
-        # Verify this attempt belongs to the student
         if attempt.student != student:
             return Response(
                 {"error": "You do not have permission to view questions for this attempt"},
@@ -571,7 +544,6 @@ class QuizAttemptViewSet(viewsets.ModelViewSet):
     def answers(self, request, pk=None):
         attempt = self.get_object()
         
-        # Students can only view their own answers
         if self.request.user.user_role == 'student':
             student = get_object_or_404(Student, user=request.user)
             if attempt.student != student:
@@ -579,8 +551,6 @@ class QuizAttemptViewSet(viewsets.ModelViewSet):
                     {"error": "You do not have permission to view these answers"},
                     status=status.HTTP_403_FORBIDDEN
                 )
-        
-        # Teachers can only view answers for their quizzes
         elif self.request.user.user_role == 'teacher':
             teacher = get_object_or_404(Teacher, user=request.user)
             if attempt.quiz.teacher != teacher:
@@ -605,12 +575,10 @@ class StudentQuizViewSet(viewsets.ReadOnlyModelViewSet):
         student = get_object_or_404(Student, user=self.request.user)
         queryset = QuizAttempt.objects.filter(student=student).order_by('-started_at')
         
-        # Filter by quiz if specified
         quiz_id = self.request.query_params.get('quiz_id', None)
         if quiz_id:
             queryset = queryset.filter(quiz_id=quiz_id)
         
-        # Filter by completion status if specified
         is_completed = self.request.query_params.get('is_completed', None)
         if is_completed is not None:
             is_completed = is_completed.lower() == 'true'
@@ -628,10 +596,8 @@ class StudentQuizViewSet(viewsets.ReadOnlyModelViewSet):
     def available_quizzes(self, request):
         student = get_object_or_404(Student, user=request.user)
         
-        # Get all groups the student is in
         student_groups = student.groups.all()
         
-        # Get all active quiz assignments for these groups
         now = timezone.now()
         active_assignments = QuizAssignment.objects.filter(
             group__in=student_groups,
@@ -644,11 +610,9 @@ class StudentQuizViewSet(viewsets.ReadOnlyModelViewSet):
         for assignment in active_assignments:
             quiz = assignment.quiz
             
-            # Check attempts limit
             attempts_count = QuizAttempt.get_attempts_count(student, quiz)
             can_attempt = attempts_count < quiz.max_attempts
             
-            # Get latest attempt if exists
             latest_attempt = None
             attempts = QuizAttempt.objects.filter(
                 student=student,
@@ -686,12 +650,3 @@ class StudentQuizViewSet(viewsets.ReadOnlyModelViewSet):
         return Response(response_data)
 
 
-# URLs - urls.py
-
-from django.urls import path, include
-from rest_framework.routers import DefaultRouter
-from .views import (
-    TeacherViewSet, SciencesViewSet, GroupViewSet, ScheduleViewSet,
-    LessonMaterialViewSet, CategoryViewSet, QuizViewSet, QuestionViewSet,
-    QuizAssignmentViewSet, QuizAttemptViewSet, StudentQuizViewSet
-)
