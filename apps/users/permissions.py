@@ -165,3 +165,116 @@ class IsOwnerOrAdmin(permissions.BasePermission):
                 return request.user.can_manage_user(obj)
             return True
         return False
+    
+from rest_framework import permissions
+
+
+class IsAdmin(permissions.BasePermission):
+    """
+    Permission to allow only users with admin role.
+    """
+    def has_permission(self, request, view):
+        return request.user.is_authenticated and request.user.user_role == 'admin'
+
+
+class IsTeacher(permissions.BasePermission):
+    """
+    Permission to allow only users with teacher role.
+    """
+    def has_permission(self, request, view):
+        return request.user.is_authenticated and request.user.user_role == 'teacher'
+    
+    def has_object_permission(self, request, view, obj):
+        # For group, quiz, and other objects that have a teacher field
+        if hasattr(obj, 'teacher'):
+            return obj.teacher.user == request.user
+        return False
+
+
+class IsOwnerTeacher(permissions.BasePermission):
+    """
+    Permission to allow only the teacher who owns the specific resource.
+    """
+    def has_object_permission(self, request, view, obj):
+        # For group-related resources
+        if hasattr(obj, 'group') and hasattr(obj.group, 'teacher'):
+            return obj.group.teacher.user == request.user
+            
+        # For quiz-related resources
+        if hasattr(obj, 'quiz') and hasattr(obj.quiz, 'teacher'):
+            return obj.quiz.teacher.user == request.user
+            
+        # Direct teacher ownership
+        if hasattr(obj, 'teacher'):
+            return obj.teacher.user == request.user
+            
+        # For user-based ownership
+        if hasattr(obj, 'user'):
+            return obj.user == request.user
+            
+        return False
+
+
+class IsStudent(permissions.BasePermission):
+    """
+    Permission to allow only users with student role.
+    """
+    def has_permission(self, request, view):
+        return request.user.is_authenticated and request.user.user_role == 'student'
+    
+    def has_object_permission(self, request, view, obj):
+        # Access to their own quiz attempts
+        if hasattr(obj, 'student'):
+            return obj.student.user == request.user
+        return False
+
+
+class IsAdminOrTeacher(permissions.BasePermission):
+    """
+    Permission to allow users with either admin or teacher role.
+    """
+    def has_permission(self, request, view):
+        if not request.user.is_authenticated:
+            return False
+        return request.user.user_role in ['admin', 'teacher']
+    
+    def has_object_permission(self, request, view, obj):
+        # Admin can access anything
+        if request.user.user_role == 'admin':
+            return True
+            
+        # For teacher, check ownership
+        if request.user.user_role == 'teacher':
+            # For group resources
+            if hasattr(obj, 'teacher'):
+                return obj.teacher.user == request.user
+                
+            # For resources related to a group
+            if hasattr(obj, 'group') and hasattr(obj.group, 'teacher'):
+                return obj.group.teacher.user == request.user
+        
+        return False
+
+
+class IsAdminOrOwner(permissions.BasePermission):
+    """
+    Permission to allow admin or the owner of a resource.
+    """
+    def has_object_permission(self, request, view, obj):
+        # Admin can access anything
+        if request.user.is_authenticated and request.user.user_role == 'admin':
+            return True
+            
+        # Check if user is the owner
+        if hasattr(obj, 'user'):
+            return obj.user == request.user
+            
+        # For student resources
+        if hasattr(obj, 'student') and hasattr(obj.student, 'user'):
+            return obj.student.user == request.user
+            
+        # For teacher resources
+        if hasattr(obj, 'teacher') and hasattr(obj.teacher, 'user'):
+            return obj.teacher.user == request.user
+            
+        return False
