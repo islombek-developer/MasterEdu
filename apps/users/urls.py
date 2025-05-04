@@ -2,7 +2,7 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenRefreshView
-
+from .login import RegisterView,LoginView
 from apps.users.v1.views.views import (
     CustomTokenObtainPairView,
     BranchViewSet,
@@ -25,6 +25,10 @@ urlpatterns = [
     path('users/me/update/', UserViewSet.as_view({'put': 'update_me', 'patch': 'update_me'}), name='user-me-update'),
     path('users/teachers/', UserViewSet.as_view({'get': 'teachers'}), name='user-teachers'),
     path('users/students/', UserViewSet.as_view({'get': 'students'}), name='user-students'),
+
+    path('register/', RegisterView.as_view(), name='register'),
+    path('login/', LoginView.as_view(), name='login'),
+
 ]
 
 extra_urlpatterns = [
