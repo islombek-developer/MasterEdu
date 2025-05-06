@@ -278,3 +278,12 @@ class IsAdminOrOwner(permissions.BasePermission):
             return obj.teacher.user == request.user
             
         return False
+    
+class IsTeacherOrAdmin(permissions.BasePermission):
+    """
+    Allow access to both teachers and admins.
+    """
+    def has_permission(self, request, view):
+        if not request.user or not request.user.is_authenticated:
+            return False
+        return request.user.user_role in ['teacher', 'admin']
