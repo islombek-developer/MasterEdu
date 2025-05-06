@@ -9,7 +9,7 @@ from django.utils import timezone
 
 from apps.student.models import Student, StudentGroup, Attendance, StudentProgress
 from apps.teacher.models import QuizAttempt, Group
-from apps.student.serializers import (
+from apps.student.v1.serializers.serializers import (
     StudentSerializer, StudentCreateSerializer, StudentGroupSerializer,
     StudentGroupCreateSerializer, AttendanceSerializer, BulkAttendanceCreateSerializer,
     StudentProgressSerializer, QuizAttemptSerializer
